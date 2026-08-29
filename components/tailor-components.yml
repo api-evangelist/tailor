@@ -1,0 +1,95 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/app-shell
+docs: https://docs.tailor.tech/app-shell
+name: Tailor AppShell UI components
+description: >-
+  Tailor publishes AppShell, a first-party React application framework for building the
+  front end of an ERP application on Tailor Platform. It ships 36 documented components,
+  19 hooks and helpers, file-based routing, theming and a live hosted catalogue. This is
+  distinct from the SDKs in packages/ — AppShell is the client-side rendering layer, not
+  an API client.
+hosted_references:
+- name: UI Catalogue
+  url: https://ui.tailor.tech
+  status: 200
+  title: UI Catalogue — Tailor Platform
+  description: Every component rendered live, plus full-page samples, composite UI patterns and routing recipes with copyable source.
+- name: Theme Generator
+  url: https://theme.tailor.tech/playground
+  status: 200
+  description: Takes a primary color, previews it on real AppShell components, and exports a themes/{name}.css palette file.
+loader_libraries:
+- package: '@tailor-platform/app-shell'
+  version: 1.12.0
+  published: '2026-08-19'
+  role: The component library and application framework itself.
+- package: '@tailor-platform/app-shell-vite-plugin'
+  version: 0.2.3
+  published: '2026-06-26'
+  role: Vite plugin providing file-based routing from directory structure.
+- package: '@tailor-platform/app-shell-sdk-plugin'
+  version: 0.1.0
+  published: '2026-04-24'
+  role: Bridges AppShell into the Tailor SDK CLI.
+- package: '@tailor-platform/erp-kit'
+  version: 0.57.0
+  published: '2026-08-24'
+  role: Opinionated ERP toolkit layered on top of AppShell.
+families:
+- family: Application frame
+  components: [AppShell, Layout, SidebarLayout, DefaultHeader, DefaultSidebar, SidebarGroup, SidebarItem, AppearanceSwitcher]
+- family: Data display
+  components: [DataTable, Table, DescriptionCard, MetricCard, Card, Grid, ActivityCard, DocumentProgressCard, Timeline, Badge, Avatar]
+  note: >-
+    DataTable is the workhorse — sortable columns, filter chips, cursor-based pagination
+    matching the GraphQL Connections shape, row actions and multi-row selection.
+- family: Input and forms
+  components: [Input, Select, Combobox, Autocomplete, Checkbox, DatePicker, Button, CsvImporter, Attachment]
+  note: CsvImporter is a guided multi-step import flow with drag-and-drop upload, column mapping, validation and inline error correction.
+- family: Overlay and feedback
+  components: [Dialog, Sheet, Menu, Tooltip, Alert, Tabs, ActionPanel, CommandPalette]
+- family: Access control
+  components: [WithGuard]
+  note: Guards remove a page from the sidebar, breadcrumbs and command palette when it returns hidden.
+component_count: 36
+hooks_and_helpers:
+- createAIGatewayClient
+- createTypedPaths
+- defineModule
+- defineResource
+- useAIChat
+- useAppShell
+- useAppShellConfig
+- useAppShellData
+- useAuth
+- useOverrideBreadcrumb
+- usePageMeta
+- useRegisterCommandPaletteActions
+- useResolvedLocale
+- useRouteError
+- useTheme
+- useTimeZone
+- useToast
+hook_count: 17
+concepts:
+- name: Authentication
+  detail: OAuth2/OIDC AuthProvider component wired to the application's Auth service.
+- name: File-based routing
+  detail: Pages defined by directory structure via the Vite plugin instead of explicit module configuration.
+- name: Modules and resources
+  detail: Application structure that drives automatic routing, navigation and breadcrumbs.
+- name: Styling and theming
+  detail: Tailwind CSS v4, with a tiered theme token system and a hosted theme generator.
+- name: AI in the UI
+  detail: createAIGatewayClient and useAIChat wire AppShell components to the workspace AI Gateway using AppShell authentication.
+changelog: https://docs.tailor.tech/app-shell/changelog
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/llms.txt
+    status: 200
+  - url: https://ui.tailor.tech/
+    status: 200
+  - url: https://theme.tailor.tech/playground
+    status: 200

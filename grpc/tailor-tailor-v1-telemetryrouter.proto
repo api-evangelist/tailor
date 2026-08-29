@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package tailor.v1;
+
+import "buf/validate/validate.proto";
+import "tailor/v1/resource.proto";
+import "tailor/v1/telemetryrouter_resource.proto";
+
+message CreateOTLPExporterRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  OTLPExporter otlp_exporter = 2 [(buf.validate.field).required = true];
+}
+message CreateOTLPExporterResponse {
+  OTLPExporter otlp_exporter = 1;
+}
+
+message UpdateOTLPExporterRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  OTLPExporter otlp_exporter = 2 [(buf.validate.field).required = true];
+}
+message UpdateOTLPExporterResponse {
+  OTLPExporter otlp_exporter = 1;
+}
+
+message GetOTLPExporterRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message GetOTLPExporterResponse {
+  OTLPExporter otlp_exporter = 1;
+}
+
+message ListOTLPExportersRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string page_token = 2;
+  uint32 page_size = 3;
+  PageDirection page_direction = 4;
+}
+message ListOTLPExportersResponse {
+  repeated OTLPExporter otlp_exporters = 1;
+  string next_page_token = 2;
+  int64 total_count = 3;
+}
+
+message DeleteOTLPExporterRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message DeleteOTLPExporterResponse {}
+
+message TestOTLPExporterRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message TestOTLPExporterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message CreateResourceAttributesConfigRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  ResourceAttributesConfig resource_attributes_config = 2 [(buf.validate.field).required = true];
+}
+message CreateResourceAttributesConfigResponse {
+  ResourceAttributesConfig resource_attributes_config = 1;
+}
+
+message GetResourceAttributesConfigRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+}
+message GetResourceAttributesConfigResponse {
+  ResourceAttributesConfig resource_attributes_config = 1;
+}
+
+message UpdateResourceAttributesConfigRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  ResourceAttributesConfig resource_attributes_config = 2 [(buf.validate.field).required = true];
+}
+message UpdateResourceAttributesConfigResponse {
+  ResourceAttributesConfig resource_attributes_config = 1;
+}
+
+message DeleteResourceAttributesConfigRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+}
+message DeleteResourceAttributesConfigResponse {}

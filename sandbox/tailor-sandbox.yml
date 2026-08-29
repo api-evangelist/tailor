@@ -1,0 +1,98 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/getting-started/console
+name: Tailor console, playground and test surfaces
+description: >-
+  Tailor has no anonymous public sandbox — every interactive surface requires an account,
+  and accounts are not self-serve. What it does publish is an in-console GraphQL
+  Playground with a pre-populated access token, a migration test harness that provisions
+  a temporary throwaway workspace, and two genuinely anonymous hosted surfaces for the UI
+  layer.
+anonymous_access: false
+account_required: true
+signup_self_serve: false
+signup_note: >-
+  The SDK quickstart says "You'll need a Tailor account to start using the Tailor
+  Platform. Contact us here to get started" and links the demo form.
+  https://console.tailor.tech redirects to /login.
+surfaces:
+- name: GraphQL Playground (embedded)
+  type: playground
+  location: Tailor Platform Console, per application, left navigation
+  url: https://console.tailor.tech
+  status: 200
+  anonymous: false
+  detail: >-
+    Opens an interactive GraphQL explorer against the deployed application with a
+    pre-populated access token, so queries and mutations can be run without hand-building
+    an Authorization header. A per-application playground is also reachable directly at
+    the application endpoint plus /playground.
+- name: GraphQL Playground (application endpoint)
+  type: playground
+  url: https://{APP_NAME}-{WORKSPACE_HASH}.erp.dev/query
+  anonymous: false
+  detail: >-
+    "You can access the GraphQL playground by navigating to your Tailor Platform
+    endpoint's URL and appending /playground at the end." Opened from the CLI with
+    `tailor open` or `tailor app open -n {APP_NAME}`.
+- name: Migration test workspace
+  type: ephemeral-test-environment
+  command: tailor tailordb migration test
+  anonymous: false
+  detail: >-
+    Tests pending migrations with seed fixtures or cloned data in a TEMPORARY workspace,
+    so a destructive schema change can be rehearsed against real-shaped data before it
+    touches the live one. The closest thing Tailor has to a test mode.
+- name: Migration validate
+  type: static-check
+  command: tailor tailordb migration validate
+  anonymous: false
+  detail: >-
+    Runs the same migration-history and schema-drift checks `deploy` runs, without
+    deploying, exiting non-zero on issues.
+- name: UI Catalogue
+  type: hosted-demo
+  url: https://ui.tailor.tech
+  status: 200
+  anonymous: true
+  detail: Every AppShell component rendered live with copyable source, plus full-page samples and routing recipes.
+- name: Theme Generator
+  type: hosted-demo
+  url: https://theme.tailor.tech/playground
+  status: 200
+  anonymous: true
+  detail: Preview a primary color on real AppShell components and export the palette CSS.
+- name: Templates
+  type: starter-projects
+  url: https://github.com/tailor-platform/templates
+  anonymous: true
+  detail: Public starter application templates, including the hello-world template the quickstart uses.
+test_mode:
+  separate_test_keys: false
+  key_prefixes:
+  - prefix: tpp_
+    meaning: Tailor personal access token
+  - prefix: tpmu_
+    meaning: Tailor machine-user access token
+  note: >-
+    Tailor publishes no test-vs-live key distinction. Isolation is by WORKSPACE — a
+    separate workspace per environment, with multi-environment configuration and
+    per-environment profiles in the SDK — rather than by key mode.
+  multi_environment: https://docs.tailor.tech/sdk/multi-environment
+test_fixtures:
+  seed: '`tailor seed` via @tailor-platform/sdk-plugin-seed — TailorDB and IdP seed data.'
+  clone: CloneApplicationData RPC copies application data into another application.
+  test_cards: none
+  time_simulation: none
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://console.tailor.tech/
+    status: 200
+    note: 302 to /login?redirectTo=%2F
+  - url: https://ui.tailor.tech/
+    status: 200
+  - url: https://theme.tailor.tech/playground
+    status: 200
+  - url: https://docs.tailor.tech/sdk/quickstart.md
+    status: 200

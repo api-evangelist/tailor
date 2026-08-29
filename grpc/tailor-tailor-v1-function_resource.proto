@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package tailor.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+message FunctionErrorInfo {
+  string name = 1 [(buf.validate.field).string.max_len = 128];
+  string message = 2 [(buf.validate.field).string.max_len = 256];
+  // Only populated in GetFunctionExecution, not in ListFunctionExecutions.
+  string stack_trace = 3 [(buf.validate.field).string.max_len = 4096];
+}
+
+enum FunctionErrorKind {
+  FUNCTION_ERROR_KIND_UNSPECIFIED = 0;
+  FUNCTION_ERROR_KIND_NONE = 1;
+  FUNCTION_ERROR_KIND_USER_RUNTIME = 2;
+  FUNCTION_ERROR_KIND_USER_NON_RUNTIME = 3;
+  FUNCTION_ERROR_KIND_PLATFORM = 4;
+}
+
+enum FunctionLogSeverity {
+  FUNCTION_LOG_SEVERITY_UNSPECIFIED = 0;
+  FUNCTION_LOG_SEVERITY_LOG = 10;
+  FUNCTION_LOG_SEVERITY_DEBUG = 20;
+  FUNCTION_LOG_SEVERITY_INFO = 30;
+  FUNCTION_LOG_SEVERITY_WARNING = 40;
+  FUNCTION_LOG_SEVERITY_ERROR = 50;
+}
+
+message FunctionLogEntry {
+  string message = 1;
+  FunctionLogSeverity severity = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message FunctionExecution {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  string workspace_id = 2 [(buf.validate.field).string.uuid = true];
+  string script_name = 3;
+  Status status = 4;
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_SUCCESS = 1;
+    STATUS_FAILED = 2;
+    STATUS_RUNNING = 3;
+    STATUS_SUSPEND = 4;
+    // Cancel was requested for a RUNNING job execution; termination is not
+    // yet confirmed.
+    STATUS_CANCELING = 5;
+    // Terminal state: cancellation confirmed.
+    STATUS_CANCELED = 6;
+  }
+  string logs = 5;
+  google.protobuf.Timestamp started_at = 6;
+  google.protobuf.Timestamp finished_at = 7;
+  Type type = 8 [(buf.validate.field).enum = {
+    in: [
+      1,
+      2
+    ]
+  }];
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_STANDARD = 1;
+    TYPE_JOB = 2;
+  }
+  string result = 9;
+  FunctionErrorInfo error = 10;
+  FunctionErrorKind error_kind = 11;
+  string content_hash = 12;
+  repeated FunctionLogEntry log_entries = 13;
+}

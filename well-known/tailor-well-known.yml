@@ -1,0 +1,116 @@
+generated: '2026-08-29'
+method: probed
+source: https://api.tailor.tech/.well-known/oauth-authorization-server
+name: Tailor .well-known probe
+description: >-
+  Anonymous probe of the standard /.well-known/ paths across every Tailor host. One real
+  document was served: RFC 8414 OAuth 2.0 Authorization Server Metadata on the API host.
+  Everything else 404s. Two hosts answer 200 with an HTML/SPA shell for every path and
+  are recorded as misses, not hits.
+hosts:
+- host: api.tailor.tech
+  documents:
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    file: well-known/tailor-oauth-authorization-server.json
+    content_type: application/json
+    note: >-
+      Real RFC 8414 document. Issuer https://api.tailor.tech; authorization_code,
+      refresh_token and client_credentials grants; PKCE S256; DPoP nonce supported with
+      ES256/RS256; revocation and userinfo endpoints published.
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: www.tailor.tech
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: docs.tailor.tech
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: console.tailor.tech
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    note: NOT a document — the console SPA answers 200 with its HTML shell for every /.well-known/* path. Recorded as a miss.
+  - path: /.well-known/openid-configuration
+    status: 200
+    note: SPA catch-all HTML, not a document.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    note: SPA catch-all HTML, not a document.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    note: SPA catch-all HTML, not a document.
+  - path: /.well-known/api-catalog
+    status: 200
+    note: SPA catch-all HTML, not a document.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    note: SPA catch-all HTML, not a document.
+  - path: /.well-known/agent-card.json
+    status: 200
+    note: SPA catch-all HTML, not an A2A AgentCard. No agent card pointer emitted.
+  - path: /.well-known/agent.json
+    status: 200
+    note: SPA catch-all HTML, not an A2A AgentCard.
+- host: tailor.tech
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+summary:
+  real_documents: 1
+  spa_false_positives: 8
+  not_found: 29
+  security_txt: false
+  api_catalog: false
+  agent_card: false
+checked: '2026-08-29'

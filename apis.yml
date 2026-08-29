@@ -1,23 +1,267 @@
 aid: tailor
 name: Tailor
-description: 'Tailor is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Tailor Technologies builds Tailor Platform, a headless, API-first ERP for retail,
+  e-commerce and manufacturing operators. Its control plane is exposed as a single
+  254-RPC ConnectRPC service published as Protocol Buffers, and every application built
+  on it gets an automatically generated GraphQL API over TailorDB with resolvers,
+  pipelines, executors, workflows, an auth service and an OpenAI-compatible AI Gateway.
+  The company ships a TypeScript SDK, a CLI, a Terraform provider, a React application
+  framework (AppShell) and a first-party MCP server, and publishes llms.txt on both its
+  marketing and documentation hosts. Tailor is a Y Combinator (S22) company and has
+  raised $37M through Series A.
+image: https://www.tailor.tech/og.jpg
 url: https://raw.githubusercontent.com/api-evangelist/tailor/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
-specificationVersion: '0.20'
 created: '2026-08-29'
 modified: '2026-08-29'
+specificationVersion: '0.20'
 tags:
 - Company
-apis: []
+- ERP
+- Headless ERP
+- Retail
+- E-Commerce
+- Supply Chain
+- Inventory Management
+- GraphQL
+- gRPC
+- Low-Code
+- Composable Commerce
+- Manufacturing
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
+apis:
+- name: Tailor Platform Operator API
+  description: >-
+    The Tailor Platform control plane. A single tailor.v1.OperatorService with 254 RPCs
+    covering organizations, folders, teams, access grants, IP restrictions, workspaces,
+    applications and every platform component — TailorDB, Auth, IdP, Resolver/Pipeline,
+    Executor, Function, Workflow, StateFlow, Secret Manager, Static Website, AI Gateway,
+    Telemetry Router and HTTP Adapter. Served over ConnectRPC, so callable as gRPC or
+    plain HTTP. Authenticated with a Bearer personal access token or platform OAuth 2.0.
+  humanURL: https://docs.tailor.tech/reference/api/api-references
+  baseURL: https://api.tailor.tech
+  tags:
+  - Control Plane
+  - gRPC
+  - ConnectRPC
+  - Protobuf
+  properties:
+  - type: Protobuf
+    url: grpc/tailor-grpc.yml
+  - type: Documentation
+    url: https://docs.tailor.tech/reference/api/api-references
+  - type: SourceCode
+    url: https://github.com/tailor-inc/proto
+  - type: Authentication
+    url: authentication/tailor-authentication.yml
+  - type: WellKnown
+    url: well-known/tailor-well-known.yml
+- name: Tailor Application GraphQL API
+  description: >-
+    The Tailor data plane. TailorDB generates a full GraphQL API from each application's
+    schema — queries, mutations, filtering, sorting, Relay-style cursor pagination and
+    aggregation — extended by custom resolvers, pipeline resolvers and functions. Each
+    deployed application is provisioned its own endpoint on Tailor's erp.dev application
+    domain, with an embedded GraphQL Playground in the console.
+  humanURL: https://docs.tailor.tech/getting-started/graphql
+  baseURL: https://{APP_NAME}-{WORKSPACE_HASH}.erp.dev/query
+  x-base-url-rationale: >-
+    Templated on purpose, and on a domain other than tailor.tech. Tailor runs the
+    application data plane on erp.dev, a domain it controls, and its own docs publish
+    this exact form: "Navigate to your application's GraphQL playground at
+    https://{APP_NAME}-{WORKSPACE_HASH}.erp.dev/query"
+    (docs.tailor.tech/tutorials — Function deployment), alongside
+    https://{YOUR_APP_SUBDOMAIN}.erp.dev/oauth2/token. Each customer application is
+    provisioned its own host, so no single literal base exists. Left templated
+    deliberately; do not replace it with api.tailor.tech, which is the control plane and
+    a different API.
+  tags:
+  - Data Plane
+  - GraphQL
+  - TailorDB
+  properties:
+  - type: Documentation
+    url: https://docs.tailor.tech/getting-started/graphql
+  - type: Authentication
+    url: authentication/tailor-authentication.yml
+  - type: DataModel
+    url: data-model/tailor-data-model.yml
+- name: Tailor Executor Incoming Webhook API
+  description: >-
+    HTTP endpoints Tailor provisions for external systems to trigger executor operations
+    inside a workspace. Accepts application/json and application/x-www-form-urlencoded,
+    is rate limited to 100 requests per second per workspace, and returns RateLimit-Limit,
+    RateLimit-Remaining and RateLimit-Reset headers with a 429 on exhaustion.
+  humanURL: https://docs.tailor.tech/guides/executor/incoming-webhook-trigger
+  baseURL: https://api.erp.dev
+  x-base-url-rationale: >-
+    api.erp.dev is Tailor's production application-plane API host, not a non-production
+    environment — .dev is the TLD Tailor chose for the data plane. The full published
+    endpoint form is
+    https://api.erp.dev/v1/workspaces/{WORKSPACE_ID}/executors/{EXECUTOR_NAME}/invokeIncomingWebhook/{WEBHOOK_SECRET}
+    (docs.tailor.tech/tutorials/setup-executor/incoming-webhook-trigger). Host probed
+    2026-08-29: HTTP 200.
+  tags:
+  - Webhooks
+  - Events
+  - Integration
+  properties:
+  - type: Webhooks
+    url: asyncapi/tailor-webhooks.yml
+  - type: RateLimits
+    url: rate-limits/tailor-rate-limits.yml
+  - type: Documentation
+    url: https://docs.tailor.tech/guides/executor/incoming-webhook-trigger
 common:
 - type: Website
-  url: https://forgeglobal.com/tailor_stock/
+  url: https://www.tailor.tech
+- type: DeveloperPortal
+  url: https://docs.tailor.tech
+- type: Documentation
+  url: https://docs.tailor.tech
+- type: APIReference
+  url: https://docs.tailor.tech/reference/api/api-references
+- type: GettingStarted
+  url: https://docs.tailor.tech/sdk/quickstart
+- type: Support
+  url: https://docs.tailor.tech/administration/support
+- type: Blog
+  url: https://www.tailor.tech/resources
+- type: GitHubOrganization
+  url: https://github.com/tailor-platform
+- type: SignUp
+  url: https://console.tailor.tech
+- type: PrivacyPolicy
+  url: https://www.tailor.tech/privacy
+- type: Protobuf
+  url: grpc/tailor-grpc.yml
+- type: Packages
+  url: packages/tailor-packages.yml
+- type: SDKs
+  url: packages/tailor-packages.yml
+- type: CLI
+  url: cli/tailor-cli.yml
+- type: MCPServer
+  url: mcp/tailor-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/tailor-tool-crosswalk.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/tailor-llms.txt
+- type: WellKnown
+  url: well-known/tailor-well-known.yml
+- type: Authentication
+  url: authentication/tailor-authentication.yml
+- type: OAuthScopes
+  url: scopes/tailor-scopes.yml
+- type: Conformance
+  url: conformance/tailor-conformance.yml
+- type: Compliance
+  url: conformance/tailor-conformance.yml
+- type: ErrorCatalog
+  url: errors/tailor-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/tailor-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/tailor-lifecycle.yml
+- type: ChangeLog
+  url: changelog/tailor-changelog.yml
+- type: Conventions
+  url: conventions/tailor-conventions.yml
+- type: Sandbox
+  url: sandbox/tailor-sandbox.yml
+- type: Components
+  url: components/tailor-components.yml
+- type: DataModel
+  url: data-model/tailor-data-model.yml
+- type: Webhooks
+  url: asyncapi/tailor-webhooks.yml
+- type: RateLimits
+  url: rate-limits/tailor-rate-limits.yml
+- type: Plans
+  url: plans/tailor-plans-pricing.yml
+- type: Security
+  url: security/tailor-vulnerability-disclosure.yml
+- type: TrustCenter
+  url: security/tailor-trust-center.yml
+- type: DomainSecurity
+  url: security/tailor-domain-security.yml
+x-pointer-verification:
+  checked: '2026-08-29'
+  method: fetched each common[] and properties[] URL with a browser User-Agent
+  result: every remote pointer returned HTTP 200 with a substantive body
+  probes:
+  - url: https://www.tailor.tech
+    status: 200
+  - url: https://docs.tailor.tech
+    status: 200
+  - url: https://docs.tailor.tech/reference/api/api-references
+    status: 200
+  - url: https://docs.tailor.tech/sdk/quickstart
+    status: 200
+  - url: https://docs.tailor.tech/getting-started/graphql
+    status: 200
+  - url: https://docs.tailor.tech/guides/executor/incoming-webhook-trigger
+    status: 200
+  - url: https://docs.tailor.tech/administration/support
+    status: 200
+  - url: https://www.tailor.tech/resources
+    status: 200
+  - url: https://www.tailor.tech/privacy
+    status: 200
+  - url: https://github.com/tailor-platform
+    status: 200
+  - url: https://github.com/tailor-inc/proto
+    status: 200
+  - url: https://console.tailor.tech
+    status: 200
+    note: >-
+      302 to /login?redirectTo=%2F and serves the Tailor Platform Console SPA. The shared
+      pointer-liveness probe grades this "dead" because the console answers 200 for a
+      nonsense control path too — an SPA catch-all, not a soft-404 of this page. Verified
+      by hand: the login surface is real. Kept as the SignUp/Login pointer.
+  - url: https://api.tailor.tech
+    status: 200
+  - url: https://api.erp.dev
+    status: 200
+  pointers_not_emitted:
+  - type: StatusPage
+    reason: >-
+      tailortech.statuspage.io — the status page Tailor's own security docs send
+      customers to — reports "Page Inactive" and its API returns 401 "Your page is
+      inactive". status.tailor.tech serves only the Statuspage app shell with every data
+      endpoint 403. See lifecycle/tailor-lifecycle.yml.
+  - type: TermsOfService
+    reason: >-
+      No terms page exists. /terms, /terms-of-service, /terms-of-use and /legal all 404,
+      and the sitemap's 25 URLs contain no terms page. Only a privacy policy is published.
+  - type: Pricing
+    reason: /pricing 404s and no pricing page appears in the sitemap or either llms.txt. See plans/tailor-plans-pricing.yml.
+  - type: Idempotency
+    reason: >-
+      109 of 254 control-plane RPCs declare `idempotency_level = NO_SIDE_EFFECTS`, which
+      is real machine-readable safe-retry metadata — but it covers reads only. No RPC
+      declares IDEMPOTENT, no Idempotency-Key header exists, and "idempoten" appears zero
+      times in Tailor's 2MB documentation corpus. Emitting the pointer would assert write
+      idempotency Tailor does not provide. Recorded honestly in conventions/ instead.
+  - type: AgentCard
+    reason: >-
+      /.well-known/agent-card.json and /.well-known/agent.json 404 on every Tailor host
+      except console.tailor.tech, which answers 200 with its SPA shell for every path.
+      No A2A card is published. Search-only artifact — nothing written.
+  - type: Roadmap
+    reason: No public roadmap page found on tailor.tech, docs.tailor.tech or the GitHub organization.
+  - type: Postman
+    reason: No public Postman collection or workspace found. The API is gRPC/Connect and GraphQL, not REST.
+x-enrichment:
+  date: '2026-08-29'
+  status: enriched
+  artifacts_added: 71
+  pass: local-v1

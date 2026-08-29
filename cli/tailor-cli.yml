@@ -1,0 +1,128 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/sdk/cli-reference
+docs: https://docs.tailor.tech/sdk/cli-reference
+name: Tailor CLI
+description: >-
+  Tailor ships two first-party CLIs. `tailor` is the current one, distributed inside
+  @tailor-platform/sdk and used for everything from scaffolding through deploy, schema
+  migration, secrets and workflow operations. `tailorctl` is the earlier Go binary, still
+  released, and is the process that hosts Tailor's MCP server.
+clis:
+- name: tailor
+  package: '@tailor-platform/sdk'
+  version: 2.7.0
+  current: true
+  install:
+  - npm create @tailor-platform/sdk -- --template hello-world example-app
+  - npx tailor <command>
+  - bun tailor <command>
+  runtime: Node.js 22.18.0 or later (Bun supported, with a documented HTTP/2 caveat)
+  agent_affordances:
+    json_output: >-
+      `--json` writes one parseable JSON document to stdout on success; empty result sets
+      are emitted as JSON values such as [] rather than empty stdout. Errors, warnings and
+      progress go to stderr, and a failure under --json emits a JSON error envelope with
+      a stable error.code plus optional error.next and error.context for automated
+      recovery.
+    api_introspection: >-
+      `tailor api list` enumerates all invocable OperatorService methods and
+      `tailor api inspect` prints the input message tree of an endpoint — so the 254-RPC
+      control-plane contract is discoverable from the CLI without reading the .proto.
+    agent_skills: >-
+      `tailor skills add|list|remove|sync` installs Tailor's own packaged agent skills
+      into a project. See skills/.
+  global_options:
+  - '--env-file / -e'
+  - '--env-file-if-exists'
+  - '--verbose'
+  - '--json / -j'
+  common_options:
+  - '--workspace-id / -w'
+  - '--profile / -p'
+  - '--config / -c'
+  - '--yes / -y'
+  command_groups:
+  - group: Application
+    commands: [init, generate, deploy, remove, show, open, api, api inspect, api list]
+  - group: TailorDB
+    commands: [tailordb, tailordb truncate, tailordb migration, tailordb migration generate, tailordb migration rebaseline, tailordb migration script, tailordb migration set, tailordb migration status, tailordb migration sync, tailordb migration test, tailordb migration validate]
+  - group: Query
+    commands: [query]
+    note: Runs SQL or GraphQL against a deployed application.
+  - group: User & Auth
+    commands: [login, logout, auth, auth token, user, user current, user list, user pat, user pat create, user pat delete, user pat list, user pat update, user switch]
+  - group: Organization
+    commands: [organization, organization get, organization list, organization tree, organization update, organization folder, organization folder create, organization folder delete, organization folder get, organization folder list, organization folder update]
+  - group: Workspace
+    commands: [workspace, workspace create, workspace delete, workspace get, workspace list, workspace restore, workspace app, workspace app health, workspace app list, workspace user, workspace user invite, workspace user list, workspace user remove, workspace user update, profile, profile create, profile delete, profile list, profile update]
+  - group: Auth resources
+    commands: [authconnection, authconnection authorize, authconnection delete, authconnection list, authconnection open, authconnection revoke, machineuser, machineuser list, machineuser token, oauth2client, oauth2client list, oauth2client get]
+  - group: Workflow
+    commands: [workflow, workflow list, workflow get, workflow start, workflow wait, workflow executions, workflow resume]
+  - group: Function
+    commands: [function, function get, function list, function logs, function run, function script]
+  - group: Executor
+    commands: [executor, executor list, executor get, executor jobs, executor trigger, executor webhook, executor webhook list]
+  - group: Secret
+    commands: [secret, secret create, secret delete, secret list, secret update, secret vault, secret vault create, secret vault delete, secret vault list]
+  - group: Static website
+    commands: [staticwebsite, staticwebsite deploy, staticwebsite list, staticwebsite get, staticwebsite domain, staticwebsite domain get, staticwebsite domain list]
+  - group: Diagnostics and tooling
+    commands: [crashreport, crashreport list, crashreport send, upgrade, plugin, plugin list, completion]
+  - group: Agent skills
+    commands: [skills, skills add, skills list, skills remove, skills sync]
+  command_count: 118
+  plugins:
+    supported: true
+    status: beta
+    resolution: project node_modules/.bin first, then PATH — a project dev-dependency plugin wins over a global one
+    published_plugins:
+    - '@tailor-platform/sdk-plugin-seed'
+    - '@tailor-platform/sdk-plugin-tailordb-erd'
+    - '@tailor-platform/app-shell-sdk-plugin'
+- name: tailorctl
+  repository: https://github.com/tailor-platform/tailorctl
+  version: v2.11.1
+  released: '2026-07-23'
+  current: false
+  language: Go
+  install:
+  - brew install tailor-platform/tap/tailorctl
+  - npx -y @tailor-platform/tailor-mcp
+  role: >-
+    Earlier CLI, still released. It is the binary that hosts the MCP server
+    (`tailorctl mcp`, optionally `--transport=http`), so the MCP integration path runs
+    through tailorctl rather than the newer `tailor` CLI. Its CUE-based manifest
+    configuration is marked Maintenance in the service lifecycle policy.
+key_flows:
+- name: Scaffold and first deploy
+  steps:
+  - npm create @tailor-platform/sdk -- --template hello-world example-app
+  - npx tailor login
+  - npx tailor workspace create --name <name> --region <region>
+  - npm run deploy -- --workspace-id <id>
+- name: Safe schema change
+  steps:
+  - npx tailor tailordb migration generate
+  - npx tailor tailordb migration validate
+  - npx tailor tailordb migration test
+  - npm run deploy -- --workspace-id <id>
+- name: Machine access for automation
+  steps:
+  - npx tailor user pat create <name>
+  - npx tailor machineuser token <machine-user-name>
+  - npx tailor auth token
+ci_cd:
+  github_actions: https://docs.tailor.tech/sdk/github-actions
+  reusable_workflows: https://github.com/tailor-platform/actions
+  dry_run: workflow_dispatch input `dry-run` (boolean, default false) runs plan only
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/sdk/cli-reference.md
+    status: 200
+  - url: https://docs.tailor.tech/sdk/quickstart.md
+    status: 200
+  - url: https://api.github.com/repos/tailor-platform/tailorctl/releases
+    status: 200

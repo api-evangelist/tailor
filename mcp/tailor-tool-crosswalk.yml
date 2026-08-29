@@ -1,0 +1,130 @@
+generated: '2026-08-29'
+method: derived
+source: mcp/tailor-mcp.yml + grpc/tailor-tailor-v1-service.proto
+name: Tailor MCP tool to control-plane RPC crosswalk
+description: >-
+  Binds each published Tailor MCP tool to the OperatorService RPCs that back it. Tailor
+  ships no OpenAPI, so the REST column is replaced by the Protobuf/ConnectRPC contract —
+  OperatorService is reachable over both gRPC and HTTP, so these RPC names are the real
+  callable operations an MCP tool dispatches to.
+surfaces:
+  openapi: null
+  openapi_note: Tailor publishes no OpenAPI or Swagger description.
+  protobuf: grpc/tailor-tailor-v1-service.proto
+  protobuf_service: tailor.v1.OperatorService
+  protobuf_transport: ConnectRPC (gRPC + HTTP)
+  graphql: per-application, provisioned per workspace; there is no single public GraphQL endpoint to introspect
+  graphql_gated: true
+  mcp: local stdio via `npx -y @tailor-platform/tailor-mcp mcp`
+  mcp_gated: true
+  mcp_gate_reason: requires a Tailor account and a tpp_ personal access token
+crosswalk:
+- tool: create_resource
+  category: resource-management
+  rpc:
+  - CreateWorkspace
+  - CreateApplication
+  - CreateTailorDBService
+  - CreateTailorDBType
+  - CreateAuthService
+  - CreateAIGateway
+  - CreateOrganizationFolder
+  - CreateOrganizationTeam
+  binding: dispatch-by-resource-type
+  confidence: medium
+  note: >-
+    The tool is generic over resource type; OperatorService has no single CreateResource
+    RPC but 36 typed Create* RPCs. Listed RPCs are representative, not exhaustive, and
+    the binding was not confirmed against a live tools/list because the server is gated.
+- tool: update_resource
+  category: resource-management
+  rpc:
+  - UpdateWorkspace
+  - UpdateApplication
+  - UpdateTailorDBType
+  - UpdateAIGateway
+  - UpdateOrganization
+  binding: dispatch-by-resource-type
+  confidence: medium
+  note: 37 typed Update* RPCs exist; listed subset is representative.
+- tool: destroy_resource
+  category: resource-management
+  rpc:
+  - DeleteWorkspace
+  - DeleteApplication
+  - DeleteTailorDBType
+  - DeleteAIGateway
+  - DeleteOrganizationFolder
+  binding: dispatch-by-resource-type
+  confidence: medium
+  note: >-
+    37 typed Delete* RPCs exist. Only DeleteWorkspace has a matching reversal
+    (RestoreWorkspace); the other deletes have no restore RPC in the contract.
+- tool: fetch_resource_by_trn
+  category: resource-management
+  rpc:
+  - GetWorkspace
+  - GetApplication
+  - GetTailorDBType
+  binding: trn-resolution
+  confidence: medium
+  note: >-
+    TRN (Tailor Resource Name) is Tailor's own resource identifier scheme, documented at
+    docs.tailor.tech/reference/concepts/trn. The tool resolves a TRN to the matching
+    typed Get* RPC; 56 Get* RPCs exist.
+- tool: search_resource
+  category: resource-management
+  rpc:
+  - ListWorkspaces
+  - ListApplications
+  - ListTailorDBTypes
+  - ListAIGateways
+  binding: dispatch-by-resource-type
+  confidence: medium
+  note: Tool takes workspace ID + resource type, matching the List* RPC signature shape. 52 List* RPCs exist.
+- tool: query_graphql
+  category: data
+  rpc: []
+  binding: application-dataplane
+  confidence: high
+  note: >-
+    Not a control-plane RPC. Executes against the GraphQL API that TailorDB generates
+    for a deployed application — the data plane, not OperatorService.
+- tool: graphql_sdl
+  category: schema
+  rpc:
+  - ComposeTailorDBSDL
+  - ComposePipelineSDL
+  binding: direct
+  confidence: high
+  note: >-
+    OperatorService publishes SDL composition RPCs by name; graphql_sdl is the MCP
+    surface over them.
+mcp_only:
+- tool: query_graphql
+  reason: Targets the per-application generated GraphQL data plane, which has no control-plane RPC equivalent.
+rpc_only:
+  count: 245
+  note: >-
+    Of 254 OperatorService RPCs, roughly 245 have no dedicated MCP tool — the five
+    generic resource tools cover the CRUD surface by dispatch, but access grants
+    (Grant/Revoke*Access), IP restrictions, SCIM configuration, team membership,
+    secret management, workflow execution and telemetry routing are reachable only
+    through the RPC contract, the SDK, the CLI, or Terraform.
+  examples:
+  - GrantOrganizationAccess
+  - UpsertOrganizationIPRestriction
+  - CreateAuthSCIMResource
+  - TruncateTailorDBType
+  - RestoreWorkspace
+  - GetApplicationSchemaHealth
+  - CloneApplicationData
+coverage:
+  mcp_tools: 7
+  tools_bound_to_rpcs: 6
+  tools_unbound: 1
+  rpc_total: 254
+  rpc_named_in_crosswalk: 25
+  confidence_high: 2
+  confidence_medium: 5
+  confidence_low: 0

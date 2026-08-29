@@ -1,0 +1,137 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/guides/events
+docs: https://docs.tailor.tech/guides/events
+name: Tailor event and webhook surface
+description: >-
+  Tailor has a real event surface with a published catalog of 19 named event types and
+  their payload fields, but it publishes NO AsyncAPI document. Events are consumed inside
+  the platform by Executors and Workflows rather than delivered to subscriber URLs — the
+  outbound HTTP webhook is an Executor OPERATION the customer configures, so there is no
+  provider-managed webhook subscription API and no signed-delivery contract to document.
+asyncapi_published: false
+asyncapi_probe:
+  searched:
+  - github.com/tailor-platform (16 repos)
+  - github.com/tailor-inc (4 repos)
+  - docs.tailor.tech llms.txt and llms-full.txt
+  result: no AsyncAPI document found
+direction:
+  inbound:
+    name: Incoming Webhook Trigger
+    docs: https://docs.tailor.tech/guides/executor/incoming-webhook-trigger
+    endpoint: https://api.erp.dev/v1/workspaces/{WORKSPACE_ID}/executors/{EXECUTOR_NAME}/invokeIncomingWebhook/{WEBHOOK_SECRET}
+    methods: [POST]
+    content_types: [application/json, application/x-www-form-urlencoded]
+    auth: shared secret embedded in the URL path
+    rate_limit: 100 req/sec per workspace, 429 on exhaustion with RateLimit-* headers
+    payload_envelope: '{ "args": { "method": ..., "headers": {...}, "body": {...} } }'
+    note: >-
+      Headers are exposed lowercase with hyphens and may be arrays. Form-urlencoded data
+      is parsed into body with single values as strings and repeated values as arrays.
+  outbound:
+    name: Webhook Operation
+    docs: https://docs.tailor.tech/guides/executor/webhook-operation
+    methods: [POST]
+    note: >-
+      An Executor operation of kind "webhook" sends an HTTP POST to a URL the customer
+      configures, with customer-defined headers and request body. Only POST is supported.
+      Timeout 60s with retry up to 10 attempts. Outbound calls originate from Tailor's
+      published regional egress IPs
+      (docs.tailor.tech/reference/platform/outgoing-ip-addresses).
+    signing: not-documented
+    delivery_guarantee: at-least-once (up to 10 retry attempts on failure/timeout)
+triggers:
+- name: eventTrigger
+  description: Fires an Executor operation when a platform event is published.
+- name: incomingWebhookTrigger
+  description: Exposes an HTTP endpoint external systems call to trigger an Executor operation.
+- name: scheduleTrigger
+  description: Fires an Executor operation on a schedule.
+operations:
+- tailorGraphql
+- webhook
+- function
+- jobFunction
+events:
+- name: tailordb.type_record.created
+  service: TailorDB
+  title: Record Created
+  payload_fields: [workspaceId, namespaceName, typeName, newRecord]
+- name: tailordb.type_record.updated
+  service: TailorDB
+  title: Record Updated
+  payload_fields: [workspaceId, namespaceName, typeName, oldRecord, newRecord]
+- name: tailordb.type_record.deleted
+  service: TailorDB
+  title: Record Deleted
+  payload_fields: [workspaceId, namespaceName, typeName]
+- name: tailordb.type_record_file.uploaded
+  service: TailorDB
+  title: File Uploaded
+- name: pipeline.resolver.executed
+  service: Resolver
+  title: Resolver Executed
+- name: auth.access_token.issued
+  service: Auth
+  title: Access Token Issued
+- name: idp.user.created
+  service: Built-in IdP
+  title: User Created
+- name: idp.user.updated
+  service: Built-in IdP
+  title: User Updated
+- name: idp.user.deleted
+  service: Built-in IdP
+  title: User Deleted
+- name: workflow.workflow_execution.started
+  service: Workflow
+  title: Workflow Execution Started
+- name: workflow.workflow_execution.completed
+  service: Workflow
+  title: Workflow Execution Completed
+- name: workflow.workflow_execution.retried
+  service: Workflow
+  title: Workflow Execution Retried
+- name: workflow.workflow_execution.resumed
+  service: Workflow
+  title: Workflow Execution Resumed
+- name: workflow.workflow_execution.wait_started
+  service: Workflow
+  title: Workflow Execution Wait Started
+- name: workflow.workflow_execution.wait_resolved
+  service: Workflow
+  title: Workflow Execution Wait Resolved
+- name: workflow.workflow_execution.job_execution.started
+  service: Workflow
+  title: Job Execution Started
+- name: workflow.workflow_execution.job_execution.completed
+  service: Workflow
+  title: Job Execution Completed
+- name: workflow.workflow_execution.job_execution.wait_started
+  service: Workflow
+  title: Job Execution Wait Started
+- name: workflow.workflow_execution.job_execution.wait_resolved
+  service: Workflow
+  title: Job Execution Wait Resolved
+event_count: 19
+naming_convention: '{service}.{entity}.{past_tense_verb}, dot-delimited, snake_case entities'
+contract_support:
+  proto: grpc/tailor-tailor-v1-events.proto
+  note: >-
+    An Events service and its resource messages ship in the published Protocol Buffers,
+    so the event configuration surface is contract-described even though the event
+    payloads themselves are documented only in prose.
+gaps:
+- No AsyncAPI document, so the 19 event types and their payloads are not machine-readable.
+- No webhook signature or verification scheme is documented for outbound Executor webhooks.
+- Inbound webhook authentication is a secret in the URL path rather than a signed header.
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/guides/events.md
+    status: 200
+  - url: https://docs.tailor.tech/guides/executor/incoming-webhook-trigger.md
+    status: 200
+  - url: https://docs.tailor.tech/guides/executor/webhook-operation.md
+    status: 200

@@ -1,0 +1,180 @@
+generated: '2026-08-29'
+method: searched
+source: https://api.tailor.tech/.well-known/oauth-authorization-server + grpc/tailor-tailor-v1-auth_resource.proto + https://docs.tailor.tech/reference/security
+name: Tailor standards conformance
+description: >-
+  Standards Tailor's contract and documentation declare for themselves. Every entry
+  points at the exact spec location or docs URL that carries the evidence; nothing here
+  is inferred from marketing copy.
+standards:
+- id: oauth2
+  name: OAuth 2.0
+  conforms: true
+  evidence: >-
+    Platform authorization server publishes authorization, token, revocation and userinfo
+    endpoints with authorization_code, refresh_token and client_credentials grants —
+    https://api.tailor.tech/.well-known/oauth-authorization-server (200).
+- id: rfc8414
+  name: RFC 8414 OAuth 2.0 Authorization Server Metadata
+  conforms: true
+  evidence: >-
+    /.well-known/oauth-authorization-server returns a conformant metadata document with
+    issuer, authorization_endpoint, token_endpoint, revocation_endpoint,
+    grant_types_supported, response_types_supported and
+    token_endpoint_auth_methods_supported. Saved verbatim at
+    well-known/tailor-oauth-authorization-server.json.
+- id: rfc7636
+  name: PKCE (RFC 7636)
+  conforms: true
+  evidence: code_challenge_methods_supported = ["S256"] in the published AS metadata.
+- id: rfc9449
+  name: DPoP (RFC 9449)
+  conforms: true
+  evidence: >-
+    dpop_signing_alg_values_supported = ["ES256","RS256"] and dpop_nonce_supported = true
+    in the published AS metadata; @tailor-platform/auth-public-client is described as
+    "Tailor Platform OAuth2 public client with DPoP+PKCE support".
+- id: oidc
+  name: OpenID Connect
+  conforms: partial
+  evidence: >-
+    Applications integrate external identity providers over OIDC
+    (docs.tailor.tech/guides/auth/overview) and AppShell ships an OAuth2/OIDC
+    AuthProvider. The PLATFORM authorization server does NOT serve
+    /.well-known/openid-configuration (404), so platform-level OIDC discovery is absent
+    even though a userinfo_endpoint is published.
+- id: saml
+  name: SAML 2.0
+  conforms: true
+  evidence: >-
+    SSO over SAML is documented and the platform serves per-workspace SP metadata at
+    https://api.tailor.tech/saml/{workspace_id}/{auth_namespace}/metadata.xml with an ACS
+    at https://api.tailor.tech/saml/acs.
+- id: scim
+  name: SCIM 2.0 (RFC 7643 / RFC 7644)
+  conforms: true
+  domain_standard: true
+  evidence: >-
+    Declared IN THE CONTRACT, not in prose. grpc/tailor-tailor-v1-auth_resource.proto
+    defines AuthSCIMConfig, AuthSCIMResource, AuthSCIMSchema, AuthSCIMAttributeMapping
+    (tailor_db_field -> scim_path) and AuthSCIMAttribute, whose fields reproduce the
+    RFC 7643 §2.2 attribute characteristics exactly — type (complex/string/number/
+    boolean/datetime), mutability (readOnly/readWrite/writeOnly), required, multi_valued,
+    uniqueness (none/server/global), canonical_values and sub_attributes. Ten
+    OperatorService RPCs manage SCIM configs and resources
+    (CreateAuthSCIMConfig/Resource, Update…, Delete…, Get…, GetAuthSCIMResources).
+  caveat: >-
+    No literal urn:ietf:params:scim:schemas:* URN string appears in the published protos;
+    the schema NAME is customer-supplied via AuthSCIMSchema.name. The conformance claim
+    rests on the attribute model, which is unambiguously SCIM.
+  market_relevance: >-
+    Enterprise identity is the integration Tailor's mid-market and enterprise ERP buyers
+    bring with them. A buyer already speaking SCIM provisions users into TailorDB with no
+    bespoke connector; a buyer who is not needs a bilateral one.
+- id: grpc
+  name: gRPC
+  conforms: true
+  evidence: >-
+    "Using ConnectRPC, we support both gRPC and HTTP protocols" —
+    docs.tailor.tech/reference/api/api-references. 254 RPCs on tailor.v1.OperatorService.
+- id: protobuf
+  name: Protocol Buffers
+  conforms: true
+  evidence: >-
+    38 .proto files published at github.com/tailor-inc/proto and on the Buf Schema
+    Registry at buf.build/tailor-inc/tailor; buf.yaml declares STANDARD + COMMENT_RPC
+    lint and FILE breaking-change detection.
+- id: connectrpc
+  name: Connect protocol
+  conforms: true
+  evidence: docs.tailor.tech/reference/api/api-references names ConnectRPC as the transport framework.
+- id: protovalidate
+  name: protovalidate
+  conforms: true
+  evidence: >-
+    buf.yaml depends on buf.build/bufbuild/protovalidate and the protos carry
+    (buf.validate.field) constraints inline, so request validation rules travel with the
+    contract.
+- id: graphql
+  name: GraphQL
+  conforms: true
+  evidence: >-
+    TailorDB generates a GraphQL API per application; SDL is composable via the
+    ComposeTailorDBSDL and ComposePipelineSDL RPCs and fetchable through the MCP
+    graphql_sdl tool.
+- id: graphql-cursor-connections
+  name: GraphQL Cursor Connections (Relay)
+  conforms: true
+  evidence: >-
+    Generated queries use first/after/before arguments and edges { node { … } } response
+    shape — docs.tailor.tech/getting-started/graphql.
+- id: ratelimit-headers
+  name: RateLimit header fields (IETF draft)
+  conforms: true
+  evidence: >-
+    Incoming webhook responses carry RateLimit-Limit, RateLimit-Remaining and
+    RateLimit-Reset — docs.tailor.tech/reference/platform/platform-limits. Tailor uses
+    the unprefixed IETF draft names rather than X-RateLimit-*.
+- id: rfc9457
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence: >-
+    No application/problem+json media type appears in the published protos or docs.
+    Errors surface as ConnectRPC/gRPC status codes on the control plane and as the
+    GraphQL errors array on the data plane.
+- id: protobuf-idempotency-level
+  name: Protobuf method idempotency_level
+  conforms: true
+  evidence: >-
+    109 of the 254 OperatorService RPCs carry `option idempotency_level = NO_SIDE_EFFECTS`
+    in grpc/tailor-tailor-v1-service.proto, machine-declaring exactly which calls are
+    safe to retry. That is every Get* (56) and List* (52) RPC plus Ping. No RPC declares
+    `IDEMPOTENT`, so no mutating call carries a retry guarantee.
+- id: idempotency-key
+  name: Idempotency-Key (IETF draft)
+  conforms: false
+  evidence: >-
+    No idempotency key, idempotent-retry or de-duplication mechanism is documented
+    anywhere in Tailor's documentation (searched the full llms-full.txt corpus,
+    2,039,144 bytes, zero matches for "idempoten").
+- id: soc2
+  name: SOC 2
+  conforms: true
+  evidence: https://docs.tailor.tech/reference/security — "Tailor complies with SOC2".
+  access: report available on request
+- id: opentelemetry
+  name: OpenTelemetry
+  conforms: true
+  evidence: >-
+    A Telemetry Router service is published in the contract
+    (grpc/tailor-tailor-v1-telemetryrouter.proto) and documented under
+    docs.tailor.tech/guides/opentelemetry.
+- id: odata
+  name: OData
+  conforms: false
+  evidence: No $metadata surface or OData annotation appears in the contract or docs.
+- id: fhir
+  name: FHIR
+  conforms: false
+  evidence: Out of market — Tailor sells retail/e-commerce/manufacturing ERP.
+domain_standard_summary:
+  market: ERP / retail operations
+  finding: >-
+    Retail ERP has no single dominant machine-readable interchange standard the way
+    banking has ISO 20022 or healthcare has HL7. Tailor's one contract-declared domain
+    standard is SCIM 2.0 for enterprise identity provisioning. EDI (X12/EDIFACT) is the
+    standard a retail/manufacturing ERP buyer would look for next and Tailor declares
+    none — integration to Shopify, QuickBooks, Odoo and ShipStation is done with
+    per-vendor connectors instead.
+compliance_published: true
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://api.tailor.tech/.well-known/oauth-authorization-server
+    status: 200
+  - url: https://api.tailor.tech/.well-known/openid-configuration
+    status: 404
+  - url: https://docs.tailor.tech/reference/security.md
+    status: 200
+  - url: https://api.github.com/repos/tailor-inc/proto/tarball/main
+    status: 200

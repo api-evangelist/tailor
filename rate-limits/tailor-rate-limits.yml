@@ -1,0 +1,107 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/reference/platform/platform-limits
+docs: https://docs.tailor.tech/reference/platform/platform-limits
+name: Tailor platform limits
+description: >-
+  Tailor publishes a single Platform Limits reference covering the one true rate limit
+  (incoming webhooks) plus the concurrency, memory and payload ceilings that behave like
+  limits from a caller's perspective. It also publishes a separate Timeouts reference.
+  The rate limit is the only one that returns a 429; the concurrency caps queue instead.
+limit_count: 11
+response_headers:
+- name: RateLimit-Limit
+  description: The limit applied to the current window.
+- name: RateLimit-Remaining
+  description: Requests remaining in the current window.
+- name: RateLimit-Reset
+  description: Seconds until the current window resets.
+header_style: IETF draft (unprefixed RateLimit-*), not X-RateLimit-*
+exhaustion_status: 429
+exhaustion_behavior: >-
+  Rate-limited requests are REJECTED, not queued, at the API gateway before the executor
+  is invoked. There is no platform-side retry.
+rate_limits:
+- name: Incoming webhook request rate
+  scope: per-workspace
+  window: 1 second (fixed, not sliding)
+  limit: 100
+  unit: requests
+  burst: null
+  status_on_exhaustion: 429
+  headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset]
+  note: >-
+    Counted per workspace across all incoming webhook endpoints, not per executor and
+    not per source IP. Because windows are fixed rather than sliding, sustained traffic
+    at exactly 100 req/sec still sees some 429s at window boundaries — the docs
+    explicitly say to target below the limit.
+concurrency_limits:
+- name: Workflow — workspace concurrent executions
+  scope: per-workspace
+  limit: 50
+  behavior: excess executions stay PENDING and are re-evaluated each scheduler tick; never rejected
+- name: Workflow — per-workflow concurrent executions
+  scope: per-workflow
+  limit: 20
+  behavior: excess executions stay PENDING
+- name: Workflow — workspace concurrent job function dispatches
+  scope: per-workspace
+  limit: 100
+  behavior: dispatch suspended, workflow moves to PENDING_RESUME, retried after ~5s
+- name: Workflow — per-key concurrent job functions (platform fallback)
+  scope: per executionPolicyKey
+  limit: 50
+  behavior: only applies when the matching execution policy declares no concurrencyPolicy.maxConcurrentExecutions
+- name: Executor — workspace concurrent job function operations
+  scope: per-workspace
+  limit: 100
+  behavior: >-
+    queued oldest-first, never dropped. Docs give the drain formula:
+    (queued ÷ 100) × average execution duration.
+- name: Recursive call depth
+  scope: per-request-chain
+  limit: 10
+  behavior: request rejected with BadRequest beyond 10 levels of nested platform-to-platform calls
+payload_limits:
+- name: Function memory
+  limit: 32 MB
+  behavior: execution terminated with "Memory limit exceeded"
+- name: JobFunction memory
+  limit: 256 MB
+  behavior: execution terminated with "Memory limit exceeded"
+- name: TailorDB select result size
+  limit: 128 MB
+  behavior: query fails; paginate or filter columns
+- name: Fetch buffered response body
+  limit: 10 MB
+  behavior: '.text()/.json() fail; streaming reader methods are exempt'
+timeouts:
+  source: https://docs.tailor.tech/reference/platform/timeouts
+  values:
+  - service: API gateway
+    timeout: 60s
+  - service: Resolver
+    timeout: 60s
+  - service: Executor (TargetTailorGraphql / TargetWebhook)
+    timeout: 60s
+    on_failure: retry up to 10 attempts
+  - service: TailorDB hooks (PreHook/PostHook)
+    timeout: 2s
+  - service: Resolver hooks (PreHook/PostHook)
+    timeout: 2s
+  - service: Function
+    timeout: 60s
+  - service: JobFunction
+    timeout: 24h
+control_plane:
+  documented_rate_limit: false
+  note: >-
+    No published rate limit for the OperatorService control-plane API. One RPC in the
+    contract declares ResourceExhausted, but no numeric quota is documented.
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/reference/platform/platform-limits.md
+    status: 200
+  - url: https://docs.tailor.tech/reference/platform/timeouts.md
+    status: 200

@@ -1,0 +1,2175 @@
+syntax = "proto3";
+
+package tailor.v1;
+
+import "tailor/v1/aigateway.proto";
+import "tailor/v1/application.proto";
+import "tailor/v1/auth.proto";
+import "tailor/v1/events.proto";
+import "tailor/v1/executor.proto";
+import "tailor/v1/function.proto";
+import "tailor/v1/function_registry.proto";
+import "tailor/v1/idp.proto";
+import "tailor/v1/metadata.proto";
+import "tailor/v1/meter.proto";
+import "tailor/v1/pipeline.proto";
+import "tailor/v1/secret_manager.proto";
+import "tailor/v1/stateflow.proto";
+import "tailor/v1/staticwebsite.proto";
+import "tailor/v1/tailordb.proto";
+import "tailor/v1/telemetryrouter.proto";
+import "tailor/v1/workflow.proto";
+import "tailor/v1/workspace.proto";
+
+service OperatorService {
+  // Ping does nothing but for checking OperatorService is available.
+  rpc Ping(PingRequest) returns (PingResponse) {}
+
+  // Workspace -------------------------------------------------------
+
+  // ListAvailableWorkspaceRegions returns available regions for workspace creation.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  rpc ListAvailableWorkspaceRegions(ListAvailableWorkspaceRegionsRequest) returns (ListAvailableWorkspaceRegionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateWorkspace creates a new workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse) {}
+
+  // UpdateWorkspace updates a workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to update
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc UpdateWorkspace(UpdateWorkspaceRequest) returns (UpdateWorkspaceResponse) {}
+
+  // DeleteWorkspace deletes a workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to delete
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (DeleteWorkspaceResponse) {}
+
+  // ListWorkspaces returns workspaces that the current platform user has
+  // access.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListOrganizationWorkspaces returns workspaces in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListOrganizationWorkspaces(ListOrganizationWorkspacesRequest) returns (ListOrganizationWorkspacesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // RestoreWorkspace restores a workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to restore
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc RestoreWorkspace(RestoreWorkspaceRequest) returns (RestoreWorkspaceResponse) {}
+
+  // GetWorkspace returns a workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListWorkspacePlatformUsers lists platform users to the workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc ListWorkspacePlatformUsers(ListWorkspacePlatformUsersRequest) returns (ListWorkspacePlatformUsersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListAvailableWorkspacePlatformUserRoles lists available roles.
+  rpc ListAvailableWorkspacePlatformUserRoles(ListAvailableWorkspacePlatformUserRolesRequest) returns (ListAvailableWorkspacePlatformUserRolesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // InviteWorkspacePlatformUser invites a platform user to the workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to invite a
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc InviteWorkspacePlatformUser(InviteWorkspacePlatformUserRequest) returns (InviteWorkspacePlatformUserResponse) {}
+
+  // RemoveWorkspacePlatformUser removes a platform user from the workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to remove
+  // - NotFound: workspace does not exist or can not be accessed, or user does
+  // not exist in the workspace
+  rpc RemoveWorkspacePlatformUser(RemoveWorkspacePlatformUserRequest) returns (RemoveWorkspacePlatformUserResponse) {}
+
+  // UpdateWorkspacePlatformUser update workspace platform user.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to update
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc UpdateWorkspacePlatformUser(UpdateWorkspacePlatformUserRequest) returns (UpdateWorkspacePlatformUserResponse) {}
+
+  // GetWorkspacePlatformUser returns a workspace platform user.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc GetWorkspacePlatformUser(GetWorkspacePlatformUserRequest) returns (GetWorkspacePlatformUserResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetWorkspaceRole returns a workspace role of the platform user.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc GetWorkspaceRole(GetWorkspaceRoleRequest) returns (GetWorkspaceRoleResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Organization -----------------------------------------------------
+
+  // UpdateOrganization updates an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to update
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpdateOrganization(UpdateOrganizationRequest) returns (UpdateOrganizationResponse) {}
+
+  // GetOrganization returns an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListOrganizations returns organizations that the current platform user has
+  // access.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListUserOrganizations returns organizations and guest organizations that a current platform user has access.
+  //
+  rpc ListUserOrganizations(ListUserOrganizationsRequest) returns (ListUserOrganizationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GrantOrganizationAccess grants access to an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to grant access
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GrantOrganizationAccess(GrantOrganizationAccessRequest) returns (GrantOrganizationAccessResponse) {}
+
+  // UpdateOrganizationAccess updates access to an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to update access
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpdateOrganizationAccess(UpdateOrganizationAccessRequest) returns (UpdateOrganizationAccessResponse) {}
+
+  // RevokeOrganizationAccess revokes access to an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to revoke access
+  // - NotFound: organization does not exist or can not be accessed
+  rpc RevokeOrganizationAccess(RevokeOrganizationAccessRequest) returns (RevokeOrganizationAccessResponse) {}
+
+  // ListOrganizationAccesses returns list of access to an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc ListOrganizationAccesses(ListOrganizationAccessesRequest) returns (ListOrganizationAccessesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetOrganizationAccess returns access to an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GetOrganizationAccess(GetOrganizationAccessRequest) returns (GetOrganizationAccessResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Organization - Folder --------------------------------------------
+
+  // CreateOrganizationFolder creates a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to create
+  // - NotFound: organization does not exist or can not be accessed
+  rpc CreateOrganizationFolder(CreateOrganizationFolderRequest) returns (CreateOrganizationFolderResponse) {}
+
+  // UpdateOrganizationFolder updates a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to update
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpdateOrganizationFolder(UpdateOrganizationFolderRequest) returns (UpdateOrganizationFolderResponse) {}
+
+  // DeleteOrganizationFolder deletes a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to delete
+  // - NotFound: organization does not exist or can not be accessed
+  rpc DeleteOrganizationFolder(DeleteOrganizationFolderRequest) returns (DeleteOrganizationFolderResponse) {}
+
+  // GetOrganizationFolder returns a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GetOrganizationFolder(GetOrganizationFolderRequest) returns (GetOrganizationFolderResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListOrganizationFolders returns folders in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListOrganizationFolders(ListOrganizationFoldersRequest) returns (ListOrganizationFoldersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GrantOrganizationFolderAccess grants access to a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to grant access
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GrantOrganizationFolderAccess(GrantOrganizationFolderAccessRequest) returns (GrantOrganizationFolderAccessResponse) {}
+
+  // UpdateOrganizationFolderAccess updates access to a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to update access
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpdateOrganizationFolderAccess(UpdateOrganizationFolderAccessRequest) returns (UpdateOrganizationFolderAccessResponse) {}
+
+  // RevokeOrganizationFolderAccess revokes access to a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to revoke access
+  // - NotFound: organization does not exist or can not be accessed
+  rpc RevokeOrganizationFolderAccess(RevokeOrganizationFolderAccessRequest) returns (RevokeOrganizationFolderAccessResponse) {}
+
+  // ListOrganizationFolderAccesses returns list of access to a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc ListOrganizationFolderAccesses(ListOrganizationFolderAccessesRequest) returns (ListOrganizationFolderAccessesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetOrganizationFolderAccess returns access to a folder in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GetOrganizationFolderAccess(GetOrganizationFolderAccessRequest) returns (GetOrganizationFolderAccessResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Organization - IP Restriction ------------------------------------
+
+  // UpsertOrganizationIPRestriction creates or replaces the IP allowlist
+  // applied to all inbound dataplane traffic for an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid (malformed CIDR, private /
+  //   loopback / multicast address, etc.)
+  // - PermissionDenied: caller does not have permission on the organization
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpsertOrganizationIPRestriction(UpsertOrganizationIPRestrictionRequest) returns (UpsertOrganizationIPRestrictionResponse) {}
+
+  // GetOrganizationIPRestriction returns the current IP allowlist for an
+  // organization, or NotFound if no rule is configured.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: caller does not have permission on the organization
+  // - NotFound: no IP restriction is configured for the organization
+  rpc GetOrganizationIPRestriction(GetOrganizationIPRestrictionRequest) returns (GetOrganizationIPRestrictionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteOrganizationIPRestriction removes the IP allowlist for an
+  // organization. NotFound is returned if no rule is configured.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: caller does not have permission on the organization
+  // - NotFound: no IP restriction is configured for the organization
+  rpc DeleteOrganizationIPRestriction(DeleteOrganizationIPRestrictionRequest) returns (DeleteOrganizationIPRestrictionResponse) {}
+
+  // Organization Folder - IP Restriction -----------------------------
+
+  // UpsertOrganizationFolderIPRestriction creates or replaces the IP
+  // allowlist applied to all inbound dataplane traffic for a folder.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: caller does not have permission on the folder
+  // - NotFound: folder does not exist or can not be accessed
+  rpc UpsertOrganizationFolderIPRestriction(UpsertOrganizationFolderIPRestrictionRequest) returns (UpsertOrganizationFolderIPRestrictionResponse) {}
+
+  // GetOrganizationFolderIPRestriction returns the current IP allowlist
+  // for a folder, or NotFound if no rule is configured.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: caller does not have permission on the folder
+  // - NotFound: no IP restriction is configured for the folder
+  rpc GetOrganizationFolderIPRestriction(GetOrganizationFolderIPRestrictionRequest) returns (GetOrganizationFolderIPRestrictionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteOrganizationFolderIPRestriction removes the IP allowlist for a
+  // folder. NotFound is returned if no rule is configured.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: caller does not have permission on the folder
+  // - NotFound: no IP restriction is configured for the folder
+  rpc DeleteOrganizationFolderIPRestriction(DeleteOrganizationFolderIPRestrictionRequest) returns (DeleteOrganizationFolderIPRestrictionResponse) {}
+
+  // Organization - Team ----------------------------------------------
+
+  // CreateOrganizationTeam creates a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to create
+  // - NotFound: organization does not exist or can not be accessed
+  rpc CreateOrganizationTeam(CreateOrganizationTeamRequest) returns (CreateOrganizationTeamResponse) {}
+
+  // UpdateOrganizationTeam updates a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to update
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpdateOrganizationTeam(UpdateOrganizationTeamRequest) returns (UpdateOrganizationTeamResponse) {}
+
+  // DeleteOrganizationTeam deletes a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to delete
+  // - NotFound: organization does not exist or can not be accessed
+  rpc DeleteOrganizationTeam(DeleteOrganizationTeamRequest) returns (DeleteOrganizationTeamResponse) {}
+
+  // GetOrganizationTeam returns a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GetOrganizationTeam(GetOrganizationTeamRequest) returns (GetOrganizationTeamResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListOrganizationTeams returns teams in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc ListOrganizationTeams(ListOrganizationTeamsRequest) returns (ListOrganizationTeamsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // AddOrganizationTeamMember adds a member to a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to add
+  // - NotFound: organization does not exist or can not be accessed
+  rpc AddOrganizationTeamMember(AddOrganizationTeamMemberRequest) returns (AddOrganizationTeamMemberResponse) {}
+
+  // UpdateOrganizationTeamMember updates a member in a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to update
+  // - NotFound: organization does not exist or can not be accessed
+  rpc UpdateOrganizationTeamMember(UpdateOrganizationTeamMemberRequest) returns (UpdateOrganizationTeamMemberResponse) {}
+
+  // RemoveOrganizationTeamMember removes a member from a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view organization but no permission to remove
+  // - NotFound: organization does not exist or can not be accessed
+  rpc RemoveOrganizationTeamMember(RemoveOrganizationTeamMemberRequest) returns (RemoveOrganizationTeamMemberResponse) {}
+
+  // ListOrganizationTeamMembers lists members in a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc ListOrganizationTeamMembers(ListOrganizationTeamMembersRequest) returns (ListOrganizationTeamMembersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetOrganizationTeamMember returns a member in a team in an organization.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: organization does not exist or can not be accessed
+  rpc GetOrganizationTeamMember(GetOrganizationTeamMemberRequest) returns (GetOrganizationTeamMemberResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Account -------------------------------------------------------------
+
+  // GetPlatformAccountPlan returns the platform account plan.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc GetPlatformAccountPlan(GetPlatformAccountPlanRequest) returns (GetPlatformAccountPlanResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Application -----------------------------------------------------
+
+  // CreateApplication creates a new application in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - PermissionDenied: can view workspace but no permission to remove
+  // - InvalidArgument: request is invalid
+  rpc CreateApplication(CreateApplicationRequest) returns (CreateApplicationResponse) {}
+
+  // UpdateApplication updates an application.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view application but no permission to remove
+  // - NotFound: application does not exist or can not be accessed
+  rpc UpdateApplication(UpdateApplicationRequest) returns (UpdateApplicationResponse) {}
+
+  // DeleteApplication deletes an application.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view application but no permission to remove
+  // - NotFound: application does not exist or can not be accessed
+  rpc DeleteApplication(DeleteApplicationRequest) returns (DeleteApplicationResponse) {}
+
+  // ListApplications returns applications in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  rpc ListApplications(ListApplicationsRequest) returns (ListApplicationsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetApplication returns a application.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: application does not exist or can not be accessed
+  rpc GetApplication(GetApplicationRequest) returns (GetApplicationResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetApplicationSchemaHealth returns the application's schema health
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: application does not exist or can not be accessed
+  rpc GetApplicationSchemaHealth(GetApplicationSchemaHealthRequest) returns (GetApplicationSchemaHealthResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Clone -----------------------------------------------------------
+
+  // CloneApplicationData clones data for an application from a source to a target.
+  // The RPC returns immediately and the clone runs asynchronously.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - Unimplemented: feature flag is disabled
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace or application does not exist or cannot be accessed
+  // - FailedPrecondition: cross-region clone or namespace mismatch
+  rpc CloneApplicationData(CloneApplicationDataRequest) returns (CloneApplicationDataResponse) {}
+
+  // GetCloneApplicationDataOperation returns the status of a clone operation.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: operation does not exist
+  rpc GetCloneApplicationDataOperation(GetCloneApplicationDataOperationRequest) returns (GetCloneApplicationDataOperationResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // AIGateway -------------------------------------------------------
+
+  // CreateAIGateway creates a new AI Gateway in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - PermissionDenied: can view workspace but no permission to create
+  // - InvalidArgument: request is invalid
+  // - AlreadyExists: an AI Gateway with the same name already exists
+  rpc CreateAIGateway(CreateAIGatewayRequest) returns (CreateAIGatewayResponse) {}
+
+  // UpdateAIGateway updates an AI Gateway. The mutable fields are
+  // `auth_namespace`, `cors`, and `disabled`.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view AI Gateway but no permission to update
+  // - NotFound: AI Gateway does not exist or can not be accessed
+  rpc UpdateAIGateway(UpdateAIGatewayRequest) returns (UpdateAIGatewayResponse) {}
+
+  // DeleteAIGateway deletes an AI Gateway.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view AI Gateway but no permission to delete
+  // - NotFound: AI Gateway does not exist or can not be accessed
+  rpc DeleteAIGateway(DeleteAIGatewayRequest) returns (DeleteAIGatewayResponse) {}
+
+  // GetAIGateway returns an AI Gateway.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: AI Gateway does not exist or can not be accessed
+  rpc GetAIGateway(GetAIGatewayRequest) returns (GetAIGatewayResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListAIGateways returns AI Gateways in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc ListAIGateways(ListAIGatewaysRequest) returns (ListAIGatewaysResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // TailorDB --------------------------------------------------------
+
+  // ComposeTailorDBSDL returns the GraphQL schema of a TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: application does not exist or can not be accessed
+  rpc ComposeTailorDBSDL(ComposeTailorDBSDLRequest) returns (ComposeTailorDBSDLResponse) {}
+
+  // CreateTailorDBService creates a new TailorDB service in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - AlreadyExists: TailorDB with the namespace already exists
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateTailorDBService(CreateTailorDBServiceRequest) returns (CreateTailorDBServiceResponse) {}
+
+  // UpdateTailorDBService updates a TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc UpdateTailorDBService(UpdateTailorDBServiceRequest) returns (UpdateTailorDBServiceResponse) {}
+
+  // DeleteTailorDBService deletes an TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc DeleteTailorDBService(DeleteTailorDBServiceRequest) returns (DeleteTailorDBServiceResponse) {}
+
+  // GetTailorDBService get a TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc GetTailorDBService(GetTailorDBServiceRequest) returns (GetTailorDBServiceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListTailorDBServices lists TailorDB services in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListTailorDBServices(ListTailorDBServicesRequest) returns (ListTailorDBServicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateTailorDBType creates a TailorDB type in a given TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc CreateTailorDBType(CreateTailorDBTypeRequest) returns (CreateTailorDBTypeResponse) {}
+
+  // UpdateTailorDBType updates a TailorDB type in a given TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB type does not exist or can not be accessed
+  // - FailedPrecondition: a field cannot be changed from optional to required while
+  //   existing records contain null values for it. The error carries a
+  //   google.rpc.PreconditionFailure detail with violation type
+  //   "REQUIRED_FIELD_HAS_NULL_VALUES" and the field name as subject.
+  rpc UpdateTailorDBType(UpdateTailorDBTypeRequest) returns (UpdateTailorDBTypeResponse) {}
+
+  // DeleteTailorDBType deletes a TailorDB type.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc DeleteTailorDBType(DeleteTailorDBTypeRequest) returns (DeleteTailorDBTypeResponse) {}
+
+  // TruncateTailorDBTypes truncates all TailorDB types in a namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc TruncateTailorDBTypes(TruncateTailorDBTypesRequest) returns (TruncateTailorDBTypesResponse) {}
+
+  // TruncateTailorDBType truncates a TailorDB type.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB type does not exist or can not be accessed
+  rpc TruncateTailorDBType(TruncateTailorDBTypeRequest) returns (TruncateTailorDBTypeResponse) {}
+
+  // ListTailorDBTypes returns TailorDB types in a given TailorDB service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc ListTailorDBTypes(ListTailorDBTypesRequest) returns (ListTailorDBTypesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetTailorDBType returns a TailorDB type.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB type does not exist or can not be accessed
+  rpc GetTailorDBType(GetTailorDBTypeRequest) returns (GetTailorDBTypeResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateTailorDBGQLPermission creates the permission configuration for the type.
+  //
+  // [Errors]
+  // - InvalidArgument: request is invalid
+  // - NotFound: type does not exist
+  rpc CreateTailorDBGQLPermission(CreateTailorDBGQLPermissionRequest) returns (CreateTailorDBGQLPermissionResponse) {}
+
+  // GetTailorDBGQLPermission returns the permission configuration for the type.
+  //
+  // [Errors]
+  // - InvalidArgument: request is invalid
+  // - NotFound: type does not exist
+  rpc GetTailorDBGQLPermission(GetTailorDBGQLPermissionRequest) returns (GetTailorDBGQLPermissionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListTailorDBGQLPermissions lists the permission configurations in a given TailorDB service.
+  //
+  // [Errors]
+  // - InvalidArgument: request is invalid
+  // - NotFound: TailorDB service does not exist or can not be accessed
+  rpc ListTailorDBGQLPermissions(ListTailorDBGQLPermissionsRequest) returns (ListTailorDBGQLPermissionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // UpdateTailorDBGQLPermission updates the permission configuration for the type.
+  //
+  // [Errors]
+  // - InvalidArgument: request is invalid
+  // - NotFound: type does not exist
+  rpc UpdateTailorDBGQLPermission(UpdateTailorDBGQLPermissionRequest) returns (UpdateTailorDBGQLPermissionResponse) {}
+
+  // DeleteTailorDBGQLPermission deletes the permission configuration for the type.
+  //
+  // [Errors]
+  // - InvalidArgument: request is invalid
+  // - NotFound: type does not exist
+  rpc DeleteTailorDBGQLPermission(DeleteTailorDBGQLPermissionRequest) returns (DeleteTailorDBGQLPermissionResponse) {}
+
+  // Pipeline --------------------------------------------------------
+
+  // CreatePipelineService creates a new pipeline service in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - AlreadyExists: pipeline with the namespace already exists
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreatePipelineService(CreatePipelineServiceRequest) returns (CreatePipelineServiceResponse) {}
+
+  // UpdatePipelineService updates a pipeline service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc UpdatePipelineService(UpdatePipelineServiceRequest) returns (UpdatePipelineServiceResponse) {}
+
+  // DeletePipelineService deletes a pipeline service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc DeletePipelineService(DeletePipelineServiceRequest) returns (DeletePipelineServiceResponse) {}
+
+  // GetPipelineService gets a pipeline service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc GetPipelineService(GetPipelineServiceRequest) returns (GetPipelineServiceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListPipelineServices lists pipeline services in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListPipelineServices(ListPipelineServicesRequest) returns (ListPipelineServicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetPipelineResolver returns a pipeline resolver in a given pipeline
+  // service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline resolver does not exist or can not be accessed
+  rpc GetPipelineResolver(GetPipelineResolverRequest) returns (GetPipelineResolverResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListPipelineResolvers returns pipeline resolvers in a given pipeline
+  // service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc ListPipelineResolvers(ListPipelineResolversRequest) returns (ListPipelineResolversResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreatePipelineResolver create pipeline resolvers in a given pipeline
+  // service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc CreatePipelineResolver(CreatePipelineResolverRequest) returns (CreatePipelineResolverResponse) {}
+
+  // UpdatePipelineResolver update pipeline resolvers.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc UpdatePipelineResolver(UpdatePipelineResolverRequest) returns (UpdatePipelineResolverResponse) {}
+
+  // DeletePipelineResolver delete pipeline resolvers.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc DeletePipelineResolver(DeletePipelineResolverRequest) returns (DeletePipelineResolverResponse) {}
+
+  // ComposePipelineSDL composes the pipeline SDL.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline service does not exist or can not be accessed
+  rpc ComposePipelineSDL(ComposePipelineSDLRequest) returns (ComposePipelineSDLResponse) {}
+
+  // ListPipelineResolverExecutionResults list all resolver execution results.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListPipelineResolverExecutionResults(ListPipelineResolverExecutionResultsRequest) returns (ListPipelineResolverExecutionResultsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetPipelineResolverExecutionResult gets a resolver execution result.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc GetPipelineResolverExecutionResult(GetPipelineResolverExecutionResultRequest) returns (GetPipelineResolverExecutionResultResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // RestartPipelineResolver restarts a pipeline resolver.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: pipeline resolver does not exist or can not be accessed
+  rpc RestartPipelineResolver(RestartPipelineResolverRequest) returns (RestartPipelineResolverResponse) {}
+
+  // Stateflow -------------------------------------------------------
+
+  // CreateStateflowService creates a new stateflow service in a given
+  // workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - AlreadyExists: stateflow with the namespace already exists
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateStateflowService(CreateStateflowServiceRequest) returns (CreateStateflowServiceResponse) {}
+
+  // UpdateStateflowService updates a stateflow service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: stateflow service does not exist or can not be accessed
+  rpc UpdateStateflowService(UpdateStateflowServiceRequest) returns (UpdateStateflowServiceResponse) {}
+
+  // DeleteStateflowService deletes a stateflow service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: stateflow service does not exist or can not be accessed
+  rpc DeleteStateflowService(DeleteStateflowServiceRequest) returns (DeleteStateflowServiceResponse) {}
+
+  // GetStateflowService get a stateflow service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: stateflow service does not exist or can not be accessed
+  rpc GetStateflowService(GetStateflowServiceRequest) returns (GetStateflowServiceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListStateflowServices get stateflow services.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListStateflowServices(ListStateflowServicesRequest) returns (ListStateflowServicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Executor -------------------------------------------------------
+
+  // CreateExecutorExecutor creates a new executor executor.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: executor service does not exist or can not be accessed
+  rpc CreateExecutorExecutor(CreateExecutorExecutorRequest) returns (CreateExecutorExecutorResponse) {}
+
+  // UpdateExecutorExecutor updates a executor executor.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: executor executor does not exist or can not be accessed
+  rpc UpdateExecutorExecutor(UpdateExecutorExecutorRequest) returns (UpdateExecutorExecutorResponse) {}
+
+  // GetExecutorExecutor gets a executor executor.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: executor executor does not exist or can not be accessed
+  rpc GetExecutorExecutor(GetExecutorExecutorRequest) returns (GetExecutorExecutorResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteExecutorExecutor deletes a executor executor.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: executor executor does not exist or can not be accessed
+  rpc DeleteExecutorExecutor(DeleteExecutorExecutorRequest) returns (DeleteExecutorExecutorResponse) {}
+
+  // ListExecutorExecutors returns executor executors.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: executor service does not exist or can not be accessed
+  rpc ListExecutorExecutors(ListExecutorExecutorsRequest) returns (ListExecutorExecutorsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetExecutorJob gets executor job.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: executor job does not exist or can not be accessed
+  rpc GetExecutorJob(GetExecutorJobRequest) returns (GetExecutorJobResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListExecutorJobs returns executor jobs.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListExecutorJobs(ListExecutorJobsRequest) returns (ListExecutorJobsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListExecutorJobAttempts returns executor job attempts.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListExecutorJobAttempts(ListExecutorJobAttemptsRequest) returns (ListExecutorJobAttemptsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListExecutorIncomingWebhooks lists incoming webhooks for the workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListExecutorIncomingWebhooks(ListExecutorIncomingWebhooksRequest) returns (ListExecutorIncomingWebhooksResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetExecutorIncomingWebhook gets an incoming webhook.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc GetExecutorIncomingWebhook(GetExecutorIncomingWebhookRequest) returns (GetExecutorIncomingWebhookResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // TriggerExecutor triggers an executor.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc TriggerExecutor(TriggerExecutorRequest) returns (TriggerExecutorResponse) {}
+
+  // SecretManager ---------------------------------------------------
+
+  // CreateSecretManagerVault creates a vault in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc CreateSecretManagerVault(CreateSecretManagerVaultRequest) returns (CreateSecretManagerVaultResponse) {}
+
+  // GetSecretManagerVault gets a vault.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: vault does not exist or can not be accessed
+  rpc GetSecretManagerVault(GetSecretManagerVaultRequest) returns (GetSecretManagerVaultResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteSecretManagerVault deletes a vault in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc DeleteSecretManagerVault(DeleteSecretManagerVaultRequest) returns (DeleteSecretManagerVaultResponse) {}
+
+  // ListSecretManagerVaults lists vaults in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListSecretManagerVaults(ListSecretManagerVaultsRequest) returns (ListSecretManagerVaultsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateSecretManagerSecret creates a secret in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc CreateSecretManagerSecret(CreateSecretManagerSecretRequest) returns (CreateSecretManagerSecretResponse) {}
+
+  // UpdateSecretManagerSecret updates a secret in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc UpdateSecretManagerSecret(UpdateSecretManagerSecretRequest) returns (UpdateSecretManagerSecretResponse) {}
+
+  // GetSecretManagerSecret gets a secret in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: secret does not exist or can not be accessed
+  rpc GetSecretManagerSecret(GetSecretManagerSecretRequest) returns (GetSecretManagerSecretResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteSecretManagerSecret deletes a secret in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc DeleteSecretManagerSecret(DeleteSecretManagerSecretRequest) returns (DeleteSecretManagerSecretResponse) {}
+
+  // ListSecretManagerSecrets lists secrets in SecretManagerService.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListSecretManagerSecrets(ListSecretManagerSecretsRequest) returns (ListSecretManagerSecretsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Auth ------------------------------------------------------------
+
+  // CreateAuthService creates a new auth service in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - AlreadyExists: auth service with the namespace already exists
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateAuthService(CreateAuthServiceRequest) returns (CreateAuthServiceResponse) {}
+
+  // UpdateAuthService updates an auth service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: auth service does not exist or can not be accessed
+  rpc UpdateAuthService(UpdateAuthServiceRequest) returns (UpdateAuthServiceResponse) {}
+
+  // DeleteAuthService deletes an auth service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: auth service does not exist or can not be accessed
+  rpc DeleteAuthService(DeleteAuthServiceRequest) returns (DeleteAuthServiceResponse) {}
+
+  // GetAuthService returns an auth service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: auth service does not exist or can not be accessed
+  rpc GetAuthService(GetAuthServiceRequest) returns (GetAuthServiceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListAuthServices returns auth services in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListAuthServices(ListAuthServicesRequest) returns (ListAuthServicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateAuthIDPConfig creates an IDP config in a given auth service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: auth service does not exist or can not be accessed
+  rpc CreateAuthIDPConfig(CreateAuthIDPConfigRequest) returns (CreateAuthIDPConfigResponse) {}
+
+  // UpdateAuthIDPConfig updates an IDP config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: IDP config does not exist or can not be accessed
+  rpc UpdateAuthIDPConfig(UpdateAuthIDPConfigRequest) returns (UpdateAuthIDPConfigResponse) {}
+
+  // DeleteAuthIDPConfig deletes an IDP config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: IDP config does not exist or can not be accessed
+  rpc DeleteAuthIDPConfig(DeleteAuthIDPConfigRequest) returns (DeleteAuthIDPConfigResponse) {}
+
+  // GetAuthIDPConfig gets an IDP config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: IDP config does not exist or can not be accessed
+  rpc GetAuthIDPConfig(GetAuthIDPConfigRequest) returns (GetAuthIDPConfigResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListAuthIDPConfigs lists IDP configs in a given auth service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListAuthIDPConfigs(ListAuthIDPConfigsRequest) returns (ListAuthIDPConfigsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateUserProfileConfig creates a user profile config in a given auth
+  // service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: auth service does not exist or can not be accessed
+  rpc CreateUserProfileConfig(CreateUserProfileConfigRequest) returns (CreateUserProfileConfigResponse) {}
+
+  // UpdateUserProfileConfig updates a user profile config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: user profile config does not exist or can not be accessed
+  rpc UpdateUserProfileConfig(UpdateUserProfileConfigRequest) returns (UpdateUserProfileConfigResponse) {}
+
+  // DeleteUserProfileConfig deletes a user profile config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: user profile config does not exist or can not be accessed
+  rpc DeleteUserProfileConfig(DeleteUserProfileConfigRequest) returns (DeleteUserProfileConfigResponse) {}
+
+  // GetUserProfileConfig deletes a user profile config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: user profile config does not exist or can not be accessed
+  rpc GetUserProfileConfig(GetUserProfileConfigRequest) returns (GetUserProfileConfigResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateUserProfileConfig creates a user profile config in a given auth
+  // service.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: auth service does not exist or can not be accessed
+  rpc CreateTenantConfig(CreateTenantConfigRequest) returns (CreateTenantConfigResponse) {}
+
+  // UpdateUserProfileConfig updates a user profile config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: user profile config does not exist or can not be accessed
+  rpc UpdateTenantConfig(UpdateTenantConfigRequest) returns (UpdateTenantConfigResponse) {}
+
+  // DeleteUserProfileConfig deletes a user profile config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: user profile config does not exist or can not be accessed
+  rpc DeleteTenantConfig(DeleteTenantConfigRequest) returns (DeleteTenantConfigResponse) {}
+
+  // GetUserProfileConfig deletes a user profile config.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: user profile config does not exist or can not be accessed
+  rpc GetTenantConfig(GetTenantConfigRequest) returns (GetTenantConfigResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Auth -- Personal Access Token
+  // CreatePersonalAccessToken creates a new personal access token.
+  rpc CreatePersonalAccessToken(CreatePersonalAccessTokenRequest) returns (CreatePersonalAccessTokenResponse) {}
+
+  // DeletePersonalAccessToken deletes a personal access token.
+  rpc DeletePersonalAccessToken(DeletePersonalAccessTokenRequest) returns (DeletePersonalAccessTokenResponse) {}
+
+  // ListPersonalAccessTokens lists all personal access tokens.
+  rpc ListPersonalAccessTokens(ListPersonalAccessTokensRequest) returns (ListPersonalAccessTokensResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Auth -- MachineUser
+  // CreateAuthMachineUser creates a new machine user.
+  rpc CreateAuthMachineUser(CreateAuthMachineUserRequest) returns (CreateAuthMachineUserResponse) {}
+
+  // UpdateAuthMachineUser updates a machine user.
+  rpc UpdateAuthMachineUser(UpdateAuthMachineUserRequest) returns (UpdateAuthMachineUserResponse) {}
+
+  // DeleteAuthMachineUser deletes a machine user.
+  rpc DeleteAuthMachineUser(DeleteAuthMachineUserRequest) returns (DeleteAuthMachineUserResponse) {}
+
+  // GetAuthMachineUser gets a machine user.
+  rpc GetAuthMachineUser(GetAuthMachineUserRequest) returns (GetAuthMachineUserResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListAuthMachineUsers lists all machine users.
+  rpc ListAuthMachineUsers(ListAuthMachineUsersRequest) returns (ListAuthMachineUsersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateAuthSCIMConfig creates SCIM config for the auth namespace.
+  rpc CreateAuthSCIMConfig(CreateAuthSCIMConfigRequest) returns (CreateAuthSCIMConfigResponse) {}
+
+  // UpdateAuthSCIMConfig updates the SCIM config for the auth namespace.
+  rpc UpdateAuthSCIMConfig(UpdateAuthSCIMConfigRequest) returns (UpdateAuthSCIMConfigResponse) {}
+
+  // DeleteAuthSCIMConfig deletes the SCIM config for the auth namespace.
+  rpc DeleteAuthSCIMConfig(DeleteAuthSCIMConfigRequest) returns (DeleteAuthSCIMConfigResponse) {}
+
+  // GetAuthSCIMConfig gets the SCIM config for the auth namespace.
+  rpc GetAuthSCIMConfig(GetAuthSCIMConfigRequest) returns (GetAuthSCIMConfigResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateAuthSCIMResource creates a SCIM Resource in a given auth service.
+  rpc CreateAuthSCIMResource(CreateAuthSCIMResourceRequest) returns (CreateAuthSCIMResourceResponse) {}
+
+  // UpdateAuthSCIMResource updates a SCIM Resource.
+  rpc UpdateAuthSCIMResource(UpdateAuthSCIMResourceRequest) returns (UpdateAuthSCIMResourceResponse) {}
+
+  // DeleteAuthSCIMResource deletes a SCIM Resource.
+  rpc DeleteAuthSCIMResource(DeleteAuthSCIMResourceRequest) returns (DeleteAuthSCIMResourceResponse) {}
+
+  // GetAuthSCIMResource gets a SCIM Resource.
+  rpc GetAuthSCIMResource(GetAuthSCIMResourceRequest) returns (GetAuthSCIMResourceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetAuthSCIMResources get SCIM Resources.
+  rpc GetAuthSCIMResources(GetAuthSCIMResourcesRequest) returns (GetAuthSCIMResourcesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Auth Hook --------------------------------------------------------
+
+  // CreateAuthHook creates a hook for the auth namespace.
+  rpc CreateAuthHook(CreateAuthHookRequest) returns (CreateAuthHookResponse) {}
+
+  // UpdateAuthHook updates a hook for the auth namespace.
+  rpc UpdateAuthHook(UpdateAuthHookRequest) returns (UpdateAuthHookResponse) {}
+
+  // DeleteAuthHook deletes a hook for the auth namespace.
+  rpc DeleteAuthHook(DeleteAuthHookRequest) returns (DeleteAuthHookResponse) {}
+
+  // GetAuthHook gets a hook for the auth namespace.
+  rpc GetAuthHook(GetAuthHookRequest) returns (GetAuthHookResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateAuthConnection creates a new auth connection.
+  rpc CreateAuthConnection(CreateAuthConnectionRequest) returns (CreateAuthConnectionResponse) {}
+
+  // UpdateAuthConnection updates an auth connection.
+  rpc UpdateAuthConnection(UpdateAuthConnectionRequest) returns (UpdateAuthConnectionResponse) {}
+
+  // ListAuthConnections lists all auth connections.
+  rpc ListAuthConnections(ListAuthConnectionsRequest) returns (ListAuthConnectionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // RevokeAuthConnection revokes an auth connection's active session.
+  rpc RevokeAuthConnection(RevokeAuthConnectionRequest) returns (RevokeAuthConnectionResponse) {}
+
+  // DeleteAuthConnection deletes an auth connection.
+  rpc DeleteAuthConnection(DeleteAuthConnectionRequest) returns (DeleteAuthConnectionResponse) {}
+
+  // RegisterAuthConnectionSession creates a new auth connection.
+  rpc RegisterAuthConnectionSession(RegisterAuthConnectionSessionRequest) returns (RegisterAuthConnectionSessionResponse) {}
+
+  // ExchangeAuthConnectionAuthorizationCode exchanges OAuth2 authorization code for tokens and stores them.
+  rpc ExchangeAuthConnectionAuthorizationCode(ExchangeAuthConnectionAuthorizationCodeRequest) returns (ExchangeAuthConnectionAuthorizationCodeResponse) {}
+
+  // CreateAuthOAuth2Client creates a new auth OAuth2 client.
+  rpc CreateAuthOAuth2Client(CreateAuthOAuth2ClientRequest) returns (CreateAuthOAuth2ClientResponse) {}
+
+  // UpdateAuthOAuth2Client updates a auth OAuth2 client.
+  rpc UpdateAuthOAuth2Client(UpdateAuthOAuth2ClientRequest) returns (UpdateAuthOAuth2ClientResponse) {}
+
+  // DeleteAuthOAuth2Client deletes a auth OAuth2 client.
+  rpc DeleteAuthOAuth2Client(DeleteAuthOAuth2ClientRequest) returns (DeleteAuthOAuth2ClientResponse) {}
+
+  // GetAuthOAuth2Client gets a auth OAuth2 client.
+  rpc GetAuthOAuth2Client(GetAuthOAuth2ClientRequest) returns (GetAuthOAuth2ClientResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListAuthOAuth2Client lists auth OAuth2 clients.
+  rpc ListAuthOAuth2Clients(ListAuthOAuth2ClientsRequest) returns (ListAuthOAuth2ClientsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Events ---------------------------------------------------------
+  // ListDataplaneEvents lists dataplane events in a given workspace.
+  rpc ListDataplaneEvents(ListDataplaneEventsRequest) returns (ListDataplaneEventsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListControlplaneActivityLogs lists controlplane activity logs in a given workspace.
+  rpc ListControlplaneActivityLogs(ListControlplaneActivityLogsRequest) returns (ListControlplaneActivityLogsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Function ---------------------------------------------------------
+  // ExecScript executes specified JavaScript code in which I/O operations are allowed and returns the result.
+  rpc ExecScript(ExecScriptRequest) returns (ExecScriptResponse) {}
+
+  // TestExecScript is the deprecated legacy alias of ExecScript, kept so tailorctl / Console callers can migrate on their own cadence.
+  //
+  // Deprecated: use ExecScript. Scheduled for removal ~N+2 releases after all callers migrate.
+  rpc TestExecScript(TestExecScriptRequest) returns (TestExecScriptResponse) {
+    option deprecated = true;
+  }
+
+  // GetFunctionExecution gets function execution.
+  rpc GetFunctionExecution(GetFunctionExecutionRequest) returns (GetFunctionExecutionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListFunctionExecutions lists function executions.
+  rpc ListFunctionExecutions(ListFunctionExecutionsRequest) returns (ListFunctionExecutionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Function Registry ------------------------------------------------
+
+  // CreateFunctionRegistry creates a new function using client streaming.
+  // Supports scripts up to 20MB. Returns ALREADY_EXISTS error if name already exists.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  // - AlreadyExists: function with the same name already exists
+  rpc CreateFunctionRegistry(stream CreateFunctionRegistryRequest) returns (CreateFunctionRegistryResponse) {}
+
+  // UpdateFunctionRegistry updates an existing function using client streaming.
+  // Supports scripts up to 20MB. Returns NOT_FOUND error if name does not exist.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: function or workspace does not exist or can not be accessed
+  rpc UpdateFunctionRegistry(stream UpdateFunctionRegistryRequest) returns (UpdateFunctionRegistryResponse) {}
+
+  // GetFunctionRegistry retrieves a function by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: function does not exist or can not be accessed
+  rpc GetFunctionRegistry(GetFunctionRegistryRequest) returns (GetFunctionRegistryResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListFunctionRegistries lists functions in the registry with pagination and filtering.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListFunctionRegistries(ListFunctionRegistriesRequest) returns (ListFunctionRegistriesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteFunctionRegistry deletes a function by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: function does not exist or can not be accessed
+  rpc DeleteFunctionRegistry(DeleteFunctionRegistryRequest) returns (DeleteFunctionRegistryResponse) {}
+
+  // DownloadFunctionRegistryScript downloads a script using server streaming.
+  // Supports scripts up to 20MB. First message contains metadata, subsequent messages contain chunks.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: function does not exist or can not be accessed
+  rpc DownloadFunctionRegistryScript(DownloadFunctionRegistryScriptRequest) returns (stream DownloadFunctionRegistryScriptResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Meter -----------------------------------------------------------
+
+  // ListMeterRequestCounts returns request counts per application in a workspace.
+  rpc ListMeterRequestCounts(ListMeterRequestCountsRequest) returns (ListMeterRequestCountsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListMeterExecutionCounts returns execution counts per service in a workspace.
+  rpc ListMeterExecutionCounts(ListMeterExecutionCountsRequest) returns (ListMeterExecutionCountsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListMeterEventCounts returns event counts per service in a workspace.
+  rpc ListMeterEventCounts(ListMeterEventCountsRequest) returns (ListMeterEventCountsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListMeterAITokenUsages returns AI Gateway token usage in a workspace,
+  // with one row per (aigateway_name, model, token_type) combination.
+  rpc ListMeterAITokenUsages(ListMeterAITokenUsagesRequest) returns (ListMeterAITokenUsagesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // IdP ------------------------------------------------------------
+
+  // ListIdPServices list all namespaces under a workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc ListIdPServices(ListIdPServicesRequest) returns (ListIdPServicesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateIdPService creates a new idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateIdPService(CreateIdPServiceRequest) returns (CreateIdPServiceResponse) {}
+
+  // UpdateIdPService updates the idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc UpdateIdPService(UpdateIdPServiceRequest) returns (UpdateIdPServiceResponse) {}
+
+  // DeleteIdPService deletes the idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: namespace does not exist or can not be accessed
+  rpc DeleteIdPService(DeleteIdPServiceRequest) returns (DeleteIdPServiceResponse) {}
+
+  // GetIdPService returns an idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: idp namespace does not exist or can not be accessed
+  rpc GetIdPService(GetIdPServiceRequest) returns (GetIdPServiceResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListIdPClients lists all clients for the idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: idp namespace does not exist or can not be accessed
+  rpc ListIdPClients(ListIdPClientsRequest) returns (ListIdPClientsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateIdPClient creates client for the idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: idp namespace does not exist or can not be accessed
+  rpc CreateIdPClient(CreateIdPClientRequest) returns (CreateIdPClientResponse) {}
+
+  // DeleteIdPClient deletes the client for the idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: client does not exist or can not be accessed
+  rpc DeleteIdPClient(DeleteIdPClientRequest) returns (DeleteIdPClientResponse) {}
+
+  // GetIdPClient gets the client for the idp namespace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: client does not exist or can not be accessed
+  rpc GetIdPClient(GetIdPClientRequest) returns (GetIdPClientResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // StaticWebsite -------------------------------------------------
+
+  // CreateStaticWebsite creates a new staticwebsite.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateStaticWebsite(CreateStaticWebsiteRequest) returns (CreateStaticWebsiteResponse) {}
+
+  // UpdateStaticWebsite updates the staticwebsite.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: staticwebsite does not exist or can not be accessed
+  rpc UpdateStaticWebsite(UpdateStaticWebsiteRequest) returns (UpdateStaticWebsiteResponse) {}
+
+  // DeleteStaticWebsite deletes the staticwebsite.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: staticwebsite does not exist or can not be accessed
+  rpc DeleteStaticWebsite(DeleteStaticWebsiteRequest) returns (DeleteStaticWebsiteResponse) {}
+
+  // GetStaticWebsite returns an staticwebsite.
+  //
+  // [Errors]
+  // - Unauthenticated: token is expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: staticwebsite does not exist or can not be accessed
+  rpc GetStaticWebsite(GetStaticWebsiteRequest) returns (GetStaticWebsiteResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListStaticWebsites returns staticwebsites.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc ListStaticWebsites(ListStaticWebsitesRequest) returns (ListStaticWebsitesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // AddCustomDomain registers a custom domain for a static website.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid or domain format is rejected
+  // - NotFound: static website does not exist
+  // - AlreadyExists: domain is already registered
+  // - ResourceExhausted: maximum number of custom domains reached
+  // - FailedPrecondition: domain already has an active TLS subscription
+  rpc AddCustomDomain(AddCustomDomainRequest) returns (AddCustomDomainResponse) {}
+
+  // GetCustomDomain gets a custom domain.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: custom domain does not exist
+  rpc GetCustomDomain(GetCustomDomainRequest) returns (GetCustomDomainResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListCustomDomains lists custom domains for a static website.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: static website does not exist
+  rpc ListCustomDomains(ListCustomDomainsRequest) returns (ListCustomDomainsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // RemoveCustomDomain removes a custom domain.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: custom domain does not exist
+  // - FailedPrecondition: domain DNS is still active, remove DNS record before deleting
+  rpc RemoveCustomDomain(RemoveCustomDomainRequest) returns (RemoveCustomDomainResponse) {}
+
+  // CreateDeployment creates a new deployment.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateDeployment(CreateDeploymentRequest) returns (CreateDeploymentResponse) {}
+
+  // UploadFile uploads a file to a deployment.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: deployment does not exist or can not be accessed
+  rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {}
+
+  // PublishDeployment publishes a deployment.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: deployment does not exist or can not be accessed
+  rpc PublishDeployment(PublishDeploymentRequest) returns (PublishDeploymentResponse) {}
+
+  // Workflow ---------------------------------------------------------
+
+  // CreateWorkflow creates a new workflow.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse) {}
+
+  // UpdateWorkflow updates a workflow.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workflow does not exist or can not be accessed
+  rpc UpdateWorkflow(UpdateWorkflowRequest) returns (UpdateWorkflowResponse) {}
+
+  // DeleteWorkflow deletes a workflow.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workflow does not exist or can not be accessed
+  rpc DeleteWorkflow(DeleteWorkflowRequest) returns (DeleteWorkflowResponse) {}
+
+  // GetWorkflow returns a workflow.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workflow does not exist or can not be accessed
+  rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetWorkflowByName returns a workflow by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workflow does not exist or can not be accessed
+  rpc GetWorkflowByName(GetWorkflowByNameRequest) returns (GetWorkflowByNameResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListWorkflows returns workflows in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListWorkflows(ListWorkflowsRequest) returns (ListWorkflowsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // CreateWorkflowJobFunction creates a workflow job function, or a new version
+  // of one that already exists. Callers that do not care whether the name is
+  // new can use this alone and skip UpdateWorkflowJobFunction.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc CreateWorkflowJobFunction(CreateWorkflowJobFunctionRequest) returns (CreateWorkflowJobFunctionResponse) {}
+
+  // UpdateWorkflowJobFunction adds a new version to an existing workflow job
+  // function. It differs from CreateWorkflowJobFunction only in requiring the
+  // name to exist.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: job function does not exist or can not be accessed
+  rpc UpdateWorkflowJobFunction(UpdateWorkflowJobFunctionRequest) returns (UpdateWorkflowJobFunctionResponse) {}
+
+  // DeleteWorkflowJobFunction deletes a workflow job function (all versions) by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: job function does not exist or can not be accessed
+  // - FailedPrecondition: job function is still referenced by one or more workflows
+  rpc DeleteWorkflowJobFunction(DeleteWorkflowJobFunctionRequest) returns (DeleteWorkflowJobFunctionResponse) {}
+
+  // GetWorkflowJobFunction returns a workflow job function.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: job function does not exist or can not be accessed
+  rpc GetWorkflowJobFunction(GetWorkflowJobFunctionRequest) returns (GetWorkflowJobFunctionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetWorkflowJobFunctionByName returns a workflow job function by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: job function does not exist or can not be accessed
+  rpc GetWorkflowJobFunctionByName(GetWorkflowJobFunctionByNameRequest) returns (GetWorkflowJobFunctionByNameResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListWorkflowJobFunctions returns workflow job functions in a given
+  // workspace, one entry per name: the latest version of each. Past versions
+  // are not enumerable through this RPC.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListWorkflowJobFunctions(ListWorkflowJobFunctionsRequest) returns (ListWorkflowJobFunctionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetWorkflowExecution returns a workflow execution.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: execution does not exist or can not be accessed
+  rpc GetWorkflowExecution(GetWorkflowExecutionRequest) returns (GetWorkflowExecutionResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListWorkflowExecutions returns workflow executions in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListWorkflowExecutions(ListWorkflowExecutionsRequest) returns (ListWorkflowExecutionsResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // StartWorkflow starts a workflow execution.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workflow does not exist or can not be accessed
+  rpc StartWorkflow(StartWorkflowRequest) returns (StartWorkflowResponse) {}
+
+  // ResumeWorkflowExecution resumes a failed workflow execution.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: execution does not exist or can not be accessed
+  // - FailedPrecondition: execution is not in a resumable state
+  rpc ResumeWorkflowExecution(ResumeWorkflowExecutionRequest) returns (ResumeWorkflowExecutionResponse) {}
+
+  // TestStartWorkflow is the deprecated legacy alias of StartWorkflow, kept so tailorctl / Console callers can migrate on their own cadence.
+  //
+  // Deprecated: use StartWorkflow. Scheduled for removal ~N+2 releases after all callers migrate.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workflow does not exist or can not be accessed
+  rpc TestStartWorkflow(TestStartWorkflowRequest) returns (TestStartWorkflowResponse) {
+    option deprecated = true;
+  }
+
+  // TestResumeWorkflow is the deprecated legacy alias of ResumeWorkflowExecution, kept so tailorctl / Console callers can migrate on their own cadence.
+  //
+  // Deprecated: use ResumeWorkflowExecution. Scheduled for removal ~N+2 releases after all callers migrate.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: execution does not exist or can not be accessed
+  // - FailedPrecondition: execution is not in a resumable state
+  rpc TestResumeWorkflow(TestResumeWorkflowRequest) returns (TestResumeWorkflowResponse) {
+    option deprecated = true;
+  }
+
+  // CreateWorkflowJobFunctionExecutionPolicy creates a new workflow job function execution policy.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - AlreadyExists: policy already exists with the given execution_policy_key
+  rpc CreateWorkflowJobFunctionExecutionPolicy(CreateWorkflowJobFunctionExecutionPolicyRequest) returns (CreateWorkflowJobFunctionExecutionPolicyResponse) {}
+
+  // UpdateWorkflowJobFunctionExecutionPolicy updates a workflow job function execution policy.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: policy does not exist or can not be accessed
+  rpc UpdateWorkflowJobFunctionExecutionPolicy(UpdateWorkflowJobFunctionExecutionPolicyRequest) returns (UpdateWorkflowJobFunctionExecutionPolicyResponse) {}
+
+  // DeleteWorkflowJobFunctionExecutionPolicy deletes a workflow job function execution policy.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: policy does not exist or can not be accessed
+  rpc DeleteWorkflowJobFunctionExecutionPolicy(DeleteWorkflowJobFunctionExecutionPolicyRequest) returns (DeleteWorkflowJobFunctionExecutionPolicyResponse) {}
+
+  // GetWorkflowJobFunctionExecutionPolicy returns a workflow job function execution policy by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: policy does not exist or can not be accessed
+  rpc GetWorkflowJobFunctionExecutionPolicy(GetWorkflowJobFunctionExecutionPolicyRequest) returns (GetWorkflowJobFunctionExecutionPolicyResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetWorkflowJobFunctionExecutionPolicyByKey returns a workflow job function execution policy by its key.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: policy does not exist or can not be accessed
+  rpc GetWorkflowJobFunctionExecutionPolicyByKey(GetWorkflowJobFunctionExecutionPolicyByKeyRequest) returns (GetWorkflowJobFunctionExecutionPolicyByKeyResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListWorkflowJobFunctionExecutionPolicies returns workflow job function execution policies in a given workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListWorkflowJobFunctionExecutionPolicies(ListWorkflowJobFunctionExecutionPoliciesRequest) returns (ListWorkflowJobFunctionExecutionPoliciesResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Metadata --------------------------------------------------------
+
+  // SetMetadata sets metadata labels for a resource.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid or TRN format is incorrect
+  // - NotFound: resource does not exist or can not be accessed
+  rpc SetMetadata(SetMetadataRequest) returns (SetMetadataResponse) {}
+
+  // GetMetadata retrieves metadata labels for a resource.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid or TRN format is incorrect
+  // - NotFound: resource does not exist or can not be accessed
+  rpc GetMetadata(GetMetadataRequest) returns (GetMetadataResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // BulkSetMetadata sets metadata labels for multiple resources in one
+  // workspace in a single request. The write is all-or-nothing: if any TRN
+  // fails validation or its resource cannot be found, no labels are changed.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid, a TRN format is incorrect, or the
+  //   requests reference more than one workspace
+  // - NotFound: a referenced resource does not exist or can not be accessed
+  rpc BulkSetMetadata(BulkSetMetadataRequest) returns (BulkSetMetadataResponse) {}
+
+  // ListMetadata finds resources in a workspace whose labels match all of
+  // the given key-value pairs.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  rpc ListMetadata(ListMetadataRequest) returns (ListMetadataResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // Controlplane Machine User -----------------------
+
+  // CreateControlplaneMachineUser creates a Controlplane Machine User for organization or folder.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to create machine user on the parent resource
+  // - NotFound: parent resource (organization or folder) does not exist
+  // - AlreadyExists: machine user with the same name already exists in the parent
+  rpc CreateControlplaneMachineUser(CreateControlplaneMachineUserRequest) returns (CreateControlplaneMachineUserResponse) {}
+
+  // UpdateControlplaneMachineUser updates a Controlplane Machine User.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to update machine user on the parent resource
+  // - NotFound: machine user does not exist
+  rpc UpdateControlplaneMachineUser(UpdateControlplaneMachineUserRequest) returns (UpdateControlplaneMachineUserResponse) {}
+
+  // GetControlplaneMachineUser returns a Controlplane Machine User.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to view machine user on the parent resource
+  // - NotFound: machine user does not exist
+  rpc GetControlplaneMachineUser(GetControlplaneMachineUserRequest) returns (GetControlplaneMachineUserResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // GetControlplaneMachineUserByName returns a Controlplane Machine User by name.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to view machine user on the parent resource
+  // - NotFound: machine user does not exist
+  rpc GetControlplaneMachineUserByName(GetControlplaneMachineUserByNameRequest) returns (GetControlplaneMachineUserByNameResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListControlplaneMachineUsers lists Controlplane Machine Users in organization or folder.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to list machine users on the parent resource
+  // - NotFound: parent resource does not exist
+  rpc ListControlplaneMachineUsers(ListControlplaneMachineUsersRequest) returns (ListControlplaneMachineUsersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteControlplaneMachineUser deletes a Controlplane Machine User.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: no permission to delete machine user on the parent resource
+  // - NotFound: machine user does not exist
+  rpc DeleteControlplaneMachineUser(DeleteControlplaneMachineUserRequest) returns (DeleteControlplaneMachineUserResponse) {}
+
+  // OTLP Exporter -------------------------------------------------------
+
+  // CreateOTLPExporter creates a new OTLP exporter configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to update
+  // - NotFound: workspace does not exist or can not be accessed
+  // - AlreadyExists: OTLP exporter with the same name already exists
+  rpc CreateOTLPExporter(CreateOTLPExporterRequest) returns (CreateOTLPExporterResponse) {}
+
+  // UpdateOTLPExporter updates an existing OTLP exporter configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to update
+  // - NotFound: workspace or OTLP exporter does not exist or can not be accessed
+  rpc UpdateOTLPExporter(UpdateOTLPExporterRequest) returns (UpdateOTLPExporterResponse) {}
+
+  // GetOTLPExporter returns an OTLP exporter configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace or OTLP exporter does not exist or can not be accessed
+  rpc GetOTLPExporter(GetOTLPExporterRequest) returns (GetOTLPExporterResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // ListOTLPExporters returns OTLP exporter configurations in a workspace.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - NotFound: workspace does not exist or can not be accessed
+  rpc ListOTLPExporters(ListOTLPExportersRequest) returns (ListOTLPExportersResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // DeleteOTLPExporter deletes an OTLP exporter configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to delete
+  // - NotFound: workspace or OTLP exporter does not exist or can not be accessed
+  rpc DeleteOTLPExporter(DeleteOTLPExporterRequest) returns (DeleteOTLPExporterResponse) {}
+
+  // TestOTLPExporter sends a test span to validate endpoint reachability.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to update
+  // - NotFound: workspace or OTLP exporter does not exist or can not be accessed
+  rpc TestOTLPExporter(TestOTLPExporterRequest) returns (TestOTLPExporterResponse) {}
+
+  // CreateResourceAttributesConfig creates the workspace-level resource
+  // attributes enrichment configuration (singleton per workspace).
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to create
+  // - AlreadyExists: config already exists for this workspace
+  rpc CreateResourceAttributesConfig(CreateResourceAttributesConfigRequest) returns (CreateResourceAttributesConfigResponse) {}
+
+  // GetResourceAttributesConfig returns the workspace-level resource
+  // attributes enrichment configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to read
+  // - NotFound: config does not exist for this workspace
+  rpc GetResourceAttributesConfig(GetResourceAttributesConfigRequest) returns (GetResourceAttributesConfigResponse) {
+    option idempotency_level = NO_SIDE_EFFECTS;
+  }
+
+  // UpdateResourceAttributesConfig updates the workspace-level resource
+  // attributes enrichment configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to update
+  // - NotFound: config does not exist for this workspace
+  rpc UpdateResourceAttributesConfig(UpdateResourceAttributesConfigRequest) returns (UpdateResourceAttributesConfigResponse) {}
+
+  // DeleteResourceAttributesConfig deletes the workspace-level resource
+  // attributes enrichment configuration.
+  //
+  // [Errors]
+  // - Unauthenticated: token is missing, expired, or invalid
+  // - InvalidArgument: request is invalid
+  // - PermissionDenied: can view workspace but no permission to delete
+  // - NotFound: config does not exist for this workspace
+  rpc DeleteResourceAttributesConfig(DeleteResourceAttributesConfigRequest) returns (DeleteResourceAttributesConfigResponse) {}
+}
+
+message PingRequest {}
+message PingResponse {}

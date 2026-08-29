@@ -1,0 +1,115 @@
+generated: '2026-08-29'
+method: derived
+source: grpc/tailor-tailor-v1-service.proto + https://docs.tailor.tech/reference/platform/platform-limits
+name: Tailor error catalog
+description: >-
+  Tailor has three distinct error surfaces and no unified problem-details envelope.
+  Control-plane errors are Connect/gRPC status codes documented per-RPC in the published
+  protos. Data-plane errors surface in the GraphQL errors array. CLI errors are emitted
+  as a JSON error envelope on stderr with a stable error.code.
+format: connect-grpc-status
+problem_json: false
+rfc9457: false
+surfaces:
+- surface: control-plane
+  transport: ConnectRPC (gRPC + HTTP)
+  envelope: gRPC status code + message
+  documented_in_contract: true
+  note: >-
+    Every RPC in tailor.v1.OperatorService carries an [Errors] comment block naming the
+    status codes it can return. This is derived by counting those declarations across
+    all 254 RPCs — it is the provider's own machine-adjacent documentation, not an
+    inference.
+- surface: data-plane
+  transport: GraphQL over HTTP
+  envelope: GraphQL errors array
+  documented_in_contract: false
+- surface: cli
+  transport: stdout/stderr
+  envelope: >-
+    JSON error envelope on stderr under --json, with a stable error.code plus optional
+    structured error.next and error.context fields for automated recovery.
+  source: https://docs.tailor.tech/sdk/cli-reference
+  note: >-
+    The CLI is the only Tailor surface that publishes a stable machine-readable error
+    code with a recovery hint. The APIs do not.
+problem_types:
+- code: InvalidArgument
+  http_equivalent: 400
+  occurrences: 204
+  title: Request is invalid
+  remediation: Correct the request payload; protovalidate constraints are declared inline in the .proto messages.
+- code: Unauthenticated
+  http_equivalent: 401
+  occurrences: 203
+  title: Token is missing, expired, or invalid
+  remediation: Re-authenticate with `tailor login`, or supply a valid tpp_ personal access token in TAILOR_TOKEN.
+- code: NotFound
+  http_equivalent: 404
+  occurrences: 171
+  title: Resource does not exist or cannot be accessed
+  remediation: >-
+    Verify the TRN or resource ID. Tailor deliberately collapses "does not exist" and
+    "not accessible to you" into one code, so this is also what an authorization miss
+    looks like.
+- code: PermissionDenied
+  http_equivalent: 403
+  occurrences: 48
+  title: Caller can see the resource but lacks permission for this operation
+  remediation: Grant the required role via Grant*Access or organization/folder team membership.
+- code: AlreadyExists
+  http_equivalent: 409
+  occurrences: 11
+  title: A resource with that name already exists
+  remediation: Choose a different name, or use the matching Update*/Upsert* RPC.
+- code: FailedPrecondition
+  http_equivalent: 412
+  occurrences: 7
+  title: System is not in the state required for the operation
+  remediation: Resolve the prerequisite the message names, then retry.
+- code: ResourceExhausted
+  http_equivalent: 429
+  occurrences: 1
+  title: Quota or limit exceeded
+  remediation: Back off and retry; see rate-limits/tailor-rate-limits.yml.
+- code: Unimplemented
+  http_equivalent: 501
+  occurrences: 1
+  title: Operation is not implemented
+  remediation: None — the RPC exists in the contract but is not served.
+runtime_errors:
+- code: '429'
+  surface: executor incoming webhook
+  title: Too Many Requests
+  meaning: Workspace exceeded 100 incoming webhook requests per second.
+  headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset]
+  remediation: Retry with exponential backoff and jitter, or batch events. No platform-side retry occurs.
+  source: https://docs.tailor.tech/reference/platform/platform-limits
+- code: BadRequest
+  surface: platform-to-platform calls
+  title: Recursive call depth exceeded
+  meaning: Nested platform-to-platform request depth exceeded 10 levels.
+  remediation: Flatten the resolver/function call chain or switch to an event-driven pattern.
+  source: https://docs.tailor.tech/reference/platform/platform-limits
+- code: Memory limit exceeded
+  surface: Function / JobFunction
+  title: Execution terminated on memory
+  meaning: Function exceeded 32 MB, or JobFunction exceeded 256 MB. Message reports used vs limit.
+  remediation: Batch or stream the workload, or move a Function workload to a JobFunction.
+  source: https://docs.tailor.tech/reference/platform/platform-limits
+gaps:
+- No RFC 9457 application/problem+json envelope on any surface.
+- No public error-code reference page; control-plane codes are only discoverable by reading the .proto comments.
+- >-
+  NotFound is returned both for a missing resource and for one the caller may not see,
+  so an agent cannot distinguish "wrong ID" from "insufficient permission" without
+  out-of-band knowledge.
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://api.github.com/repos/tailor-inc/proto/tarball/main
+    status: 200
+  - url: https://docs.tailor.tech/reference/platform/platform-limits.md
+    status: 200
+  - url: https://docs.tailor.tech/sdk/cli-reference.md
+    status: 200

@@ -1,0 +1,123 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/reference/platform/service-lifecycle-policy
+name: Tailor lifecycle, versioning and deprecation
+description: >-
+  Tailor publishes a formal Service Lifecycle Policy with five named stages and tags every
+  platform service with its current stage. Deprecations are announced with migration
+  options and an End-of-Support timeline. The status page it points at is, as of this
+  probe, deactivated.
+versioning:
+  api_version: v1
+  scheme: package-path (tailor.v1 in the Protocol Buffers)
+  sdk_scheme: semver, with published v2 and v3 migration guides and a codemod runner
+  breaking_change_detection: >-
+    buf breaking (FILE rule) is declared in buf.yaml, so contract-breaking changes are
+    caught in CI against the published module.
+  migration_guides:
+  - https://docs.tailor.tech/sdk/migration/v2
+  - https://docs.tailor.tech/sdk/migration/v3
+  codemod: '@tailor-platform/sdk-codemod'
+deprecation_policy:
+  published: true
+  url: https://docs.tailor.tech/reference/platform/service-lifecycle-policy
+  stages:
+  - name: Preview
+    meaning: Rapid iteration, frequent change, reliability not guaranteed.
+    guidance: Use only in non-production environments.
+  - name: General Availability (GA)
+    meaning: Stable and production-ready with published documentation.
+    guidance: Use in production.
+  - name: Maintenance
+    meaning: Available but no longer actively developed; critical bug fixes and security patches only.
+    guidance: Plan for migration if new functionality is needed.
+  - name: Deprecated
+    meaning: Scheduled for removal; deprecation notices and migration options provided, EOS timeline begins.
+    guidance: Stop onboarding new systems and migrate existing workloads.
+  - name: End-of-Support (EOS)
+    meaning: No longer supported but still operational until the retirement date.
+    guidance: Complete migration before the EOS date.
+  - name: Retired / Out-of-Service
+    meaning: Permanently shut down, endpoints disabled, data archived per policy.
+  sunset_headers: not-documented
+  rfc8594: false
+  note: >-
+    The policy is stage-based and human-readable. No RFC 8594 Sunset or Deprecation
+    response headers are documented, and no deprecated=true annotation appears in the
+    published protos — so the stage of a service is not machine-discoverable from the
+    contract.
+current_stages:
+- service: AI Gateway
+  stage: Preview
+  note: Unified OpenAI-compatible endpoint for accessing LLMs.
+- service: Built-in IdP
+  stage: Preview
+- service: tailorctl manifest (CUE-based)
+  stage: Maintenance
+- service: TailorDB Draft
+  stage: Deprecated
+  migration: use separate tables instead
+- service: TailorDB Validate/hook using CEL
+  stage: Deprecated
+  migration: migrate to JavaScript
+- service: TailorDB Type/Record Permissions (Legacy)
+  stage: Deprecated
+  migration: use the new permission model
+- service: StateFlow service
+  stage: Deprecated
+  migration: use built-in permissions or CDC
+status_page:
+  published_url: https://tailortech.statuspage.io/
+  status: 200
+  active: false
+  finding: >-
+    Tailor's own security page directs customers to https://tailortech.statuspage.io/ for
+    platform status. That page returns "Tailor Platform Status - Page Inactive", and its
+    API answers 401 with "Your page is inactive. Please include an API key to access this
+    resource." The custom domain status.tailor.tech is a live Statuspage CNAME
+    (t.sni.global.fastly.net) but serves only the Statuspage app shell — every data
+    endpoint (/api/v2/*, /embed/script.js, /index.json) returns 403 AccessDenied. No
+    StatusPage pointer is emitted: an advertised status page that is switched off is
+    worse than none, because customers are told to check it.
+  evidence:
+  - url: https://tailortech.statuspage.io/
+    status: 200
+    body: 'Tailor Platform Status - Page Inactive'
+  - url: https://tailortech.statuspage.io/api/v2/summary.json
+    status: 401
+    body: 'Your page is inactive. Please include an API key to access this resource.'
+  - url: https://status.tailor.tech/
+    status: 200
+    body: Atlassian Statuspage app shell, no page data
+  - url: https://status.tailor.tech/api/v2/summary.json
+    status: 403
+sla:
+  support_response: 48 hours
+  scope: support inquiries
+  url: https://docs.tailor.tech/administration/support
+  contact: support@tailor.tech
+  uptime_sla_published: false
+  note: The only published SLA is a support response commitment. No uptime or availability SLA is public.
+release_notes:
+  published_url: https://updates.tailor.tech/
+  status: 200
+  finding: >-
+    updates.tailor.tech — the release-notes URL published on Tailor's own security page —
+    301s to https://www.tailor.tech/resources?filter=release-notes, which renders the
+    general marketing resources listing with no release-notes filter applied. The real
+    dated release history lives in GitHub releases and the AppShell changelog; see
+    changelog/tailor-changelog.yml.
+data_retention:
+  url: https://docs.tailor.tech/administration/data-retention
+  see: security/tailor-trust-center.yml
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/reference/platform/service-lifecycle-policy.md
+    status: 200
+  - url: https://tailortech.statuspage.io/api/v2/summary.json
+    status: 401
+  - url: https://updates.tailor.tech/
+    status: 200
+  - url: https://docs.tailor.tech/administration/support.md
+    status: 200

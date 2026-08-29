@@ -1,0 +1,271 @@
+syntax = "proto3";
+
+package tailor.v1;
+
+import "buf/validate/validate.proto";
+import "tailor/v1/auth_resource.proto";
+import "tailor/v1/resource.proto";
+import "tailor/v1/workflow_resource.proto";
+
+message CreateWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  string main_job_function_name = 3 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  map<string, int64> job_functions = 4;
+  optional RetryPolicy retry_policy = 5;
+  optional ConcurrencyPolicy concurrency_policy = 6;
+  // Enable publishing workflow-execution events
+  // (workflow.workflow_execution.*).
+  bool publish_execution_events = 7;
+}
+message CreateWorkflowResponse {
+  Workflow workflow = 1;
+}
+
+message UpdateWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  string main_job_function_name = 3 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  map<string, int64> job_functions = 4;
+  optional RetryPolicy retry_policy = 5;
+  optional ConcurrencyPolicy concurrency_policy = 6;
+  // Enable publishing workflow-execution events
+  // (workflow.workflow_execution.*).
+  bool publish_execution_events = 7;
+}
+message UpdateWorkflowResponse {
+  Workflow workflow = 1;
+}
+
+message DeleteWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_id = 2 [(buf.validate.field).string.uuid = true];
+}
+message DeleteWorkflowResponse {}
+
+message GetWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_id = 2 [(buf.validate.field).string.uuid = true];
+}
+message GetWorkflowResponse {
+  Workflow workflow = 1;
+}
+
+message GetWorkflowByNameRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message GetWorkflowByNameResponse {
+  Workflow workflow = 1;
+}
+
+message ListWorkflowsRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string page_token = 2;
+  uint32 page_size = 3;
+  PageDirection page_direction = 4;
+}
+
+message ListWorkflowsResponse {
+  repeated Workflow workflows = 1;
+  string next_page_token = 2;
+  int64 total_count = 3;
+}
+
+message CreateWorkflowJobFunctionRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string job_function_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  string script = 3;
+  // Reference to a function in the Function Registry
+  optional string script_ref = 4;
+  // Enable publishing job-execution events
+  // (workflow.workflow_execution.job_execution.*).
+  bool publish_execution_events = 5;
+}
+message CreateWorkflowJobFunctionResponse {
+  WorkflowJobFunction job_function = 1;
+}
+
+message UpdateWorkflowJobFunctionRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string job_function_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  string script = 3;
+  // Reference to a function in the Function Registry
+  optional string script_ref = 4;
+  // Enable publishing job-execution events
+  // (workflow.workflow_execution.job_execution.*).
+  bool publish_execution_events = 5;
+}
+message UpdateWorkflowJobFunctionResponse {
+  WorkflowJobFunction job_function = 1;
+}
+
+message DeleteWorkflowJobFunctionRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string job_function_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message DeleteWorkflowJobFunctionResponse {}
+
+message GetWorkflowJobFunctionRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string job_function_id = 2 [(buf.validate.field).string.uuid = true];
+}
+message GetWorkflowJobFunctionResponse {
+  WorkflowJobFunction job_function = 1;
+}
+
+message GetWorkflowJobFunctionByNameRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string job_function_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message GetWorkflowJobFunctionByNameResponse {
+  WorkflowJobFunction job_function = 1;
+}
+
+message ListWorkflowJobFunctionsRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  // Cursor over when each job function was created, which does not move while
+  // a job function is updated.
+  string page_token = 2;
+  uint32 page_size = 3;
+  PageDirection page_direction = 4;
+}
+
+message ListWorkflowJobFunctionsResponse {
+  // One entry per job function name, the latest version of each, oldest job
+  // function first. Ordering is by when the job function was created, not by
+  // when the returned version was.
+  //
+  // Returns the lightweight WorkflowJobFunctionSummary projection (no script /
+  // script_ref) so workspace-wide listings do not have to materialise multi-MB
+  // payloads. Field tags match WorkflowJobFunction, so the change is wire
+  // compatible for clients that only read id / name / version / created_at.
+  // Use GetWorkflowJobFunction / GetWorkflowJobFunctionByName to fetch the
+  // script body for a specific job function.
+  repeated WorkflowJobFunctionSummary job_functions = 1;
+  string next_page_token = 2;
+  // Number of job functions, not of versions.
+  int64 total_count = 3;
+}
+
+message GetWorkflowExecutionRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string execution_id = 2 [(buf.validate.field).string.uuid = true];
+}
+message GetWorkflowExecutionResponse {
+  WorkflowExecution execution = 1;
+}
+
+message ListWorkflowExecutionsRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_name = 6 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  string page_token = 2;
+  uint32 page_size = 3;
+  PageDirection page_direction = 4;
+  Filter filter = 5;
+}
+message ListWorkflowExecutionsResponse {
+  repeated WorkflowExecution executions = 1;
+  string next_page_token = 2;
+  int64 total_count = 3;
+}
+
+message TestStartWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_id = 2 [(buf.validate.field).string.uuid = true];
+  AuthInvoker auth_invoker = 3;
+  optional string arg = 4;
+}
+
+message TestStartWorkflowResponse {
+  string execution_id = 1;
+}
+
+message TestResumeWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string execution_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message TestResumeWorkflowResponse {
+  string execution_id = 1;
+}
+
+message StartWorkflowRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string workflow_id = 2 [(buf.validate.field).string.uuid = true];
+  AuthInvoker auth_invoker = 3;
+  optional string arg = 4;
+}
+
+message StartWorkflowResponse {
+  string execution_id = 1;
+}
+
+message ResumeWorkflowExecutionRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string execution_id = 2 [(buf.validate.field).string.uuid = true];
+}
+
+message ResumeWorkflowExecutionResponse {
+  string execution_id = 1;
+}
+
+message CreateWorkflowJobFunctionExecutionPolicyRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  // 2..64 chars, starts with [a-z0-9], middle from [a-z0-9_:.-], last char
+  // is [a-z0-9] or `*` (trailing-wildcard form). Platform does not assign
+  // meaning to the prefix's tail character; the caller decides.
+  string execution_policy_key = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9_:.-]{0,62}[a-z0-9*]$"];
+  optional ConcurrencyPolicy concurrency_policy = 3;
+  string execution_policy_name = 4 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message CreateWorkflowJobFunctionExecutionPolicyResponse {
+  WorkflowJobFunctionExecutionPolicy policy = 1;
+}
+
+message UpdateWorkflowJobFunctionExecutionPolicyRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string execution_policy_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+  optional ConcurrencyPolicy concurrency_policy = 3;
+}
+message UpdateWorkflowJobFunctionExecutionPolicyResponse {
+  WorkflowJobFunctionExecutionPolicy policy = 1;
+}
+
+message DeleteWorkflowJobFunctionExecutionPolicyRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string execution_policy_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message DeleteWorkflowJobFunctionExecutionPolicyResponse {}
+
+message GetWorkflowJobFunctionExecutionPolicyRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string execution_policy_name = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$"];
+}
+message GetWorkflowJobFunctionExecutionPolicyResponse {
+  WorkflowJobFunctionExecutionPolicy policy = 1;
+}
+
+message GetWorkflowJobFunctionExecutionPolicyByKeyRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  // Looks up a policy by its declared key (exact or wildcard form). Pass the
+  // wildcard pattern literal (e.g. `tenant-api*`) to fetch a wildcard
+  // policy; concrete keys do not resolve here, the dispatch path uses
+  // prefix resolution instead.
+  string execution_policy_key = 2 [(buf.validate.field).string.pattern = "^[a-z0-9][a-z0-9_:.-]{0,62}[a-z0-9*]$"];
+}
+message GetWorkflowJobFunctionExecutionPolicyByKeyResponse {
+  WorkflowJobFunctionExecutionPolicy policy = 1;
+}
+
+message ListWorkflowJobFunctionExecutionPoliciesRequest {
+  string workspace_id = 1 [(buf.validate.field).string.uuid = true];
+  string page_token = 2;
+  uint32 page_size = 3;
+  PageDirection page_direction = 4;
+}
+message ListWorkflowJobFunctionExecutionPoliciesResponse {
+  repeated WorkflowJobFunctionExecutionPolicy policies = 1;
+  string next_page_token = 2;
+  int64 total_count = 3;
+}

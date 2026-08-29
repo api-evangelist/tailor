@@ -1,0 +1,224 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/getting-started/graphql + grpc/tailor-tailor-v1-service.proto
+name: Tailor cross-cutting conventions
+description: >-
+  Runtime semantics an agent needs before calling Tailor. Two planes with different
+  conventions: a ConnectRPC control plane described by Protocol Buffers, and a generated
+  GraphQL data plane per application.
+auth:
+  style: Bearer token
+  control_plane: OAuth 2.0 (authorization_code + PKCE S256, client_credentials, refresh_token) or a tpp_ personal access token
+  data_plane: Bearer access token in the Authorization header; machine-user tokens are prefixed tpmu_
+  see: authentication/tailor-authentication.yml
+idempotency:
+  supported: partial
+  mechanism: protobuf method idempotency_level
+  header: null
+  scope: control-plane RPCs only
+  declared_no_side_effects: 109
+  declared_idempotent: 0
+  total_rpcs: 254
+  retention: not-applicable
+  detail: >-
+    109 of the 254 OperatorService RPCs carry `option idempotency_level = NO_SIDE_EFFECTS`
+    directly in the published contract — every Get* (56), every List* (52) and Ping.
+    That is a real, machine-readable safe-to-retry declaration an agent can read without
+    documentation. What is NOT present: no RPC declares `IDEMPOTENT`, so no mutating call
+    carries a retry guarantee, and there is no Idempotency-Key header, no client-supplied
+    request ID, and no de-duplication window anywhere in Tailor's surface. A search of
+    the full 2,039,144-byte llms-full.txt documentation corpus returns zero matches for
+    "idempoten".
+  agent_guidance: >-
+    Reads are free to retry. Writes are not — a retried CreateWorkspace or
+    CreateTailorDBType will either create a duplicate or return AlreadyExists depending
+    on whether the resource is name-keyed. Check with the matching Get* before retrying
+    any Create*.
+  source: grpc/tailor-tailor-v1-service.proto
+pagination:
+  style: cursor (GraphQL Cursor Connections / Relay)
+  surface: data plane
+  params:
+  - name: first
+    description: Number of items to return from the start of the window.
+  - name: after
+    description: Opaque cursor; return items following this cursor.
+  - name: before
+    description: Opaque cursor; return items preceding this cursor.
+  response_fields:
+  - edges
+  - edges[].node
+  - pageInfo
+  control_plane: >-
+    List* RPCs on the control plane are not documented as paginated in the reference; the
+    page/cursor arguments, where they exist, are per-message and must be read from the
+    individual .proto.
+  source: https://docs.tailor.tech/getting-started/graphql
+field_selection:
+  style: GraphQL native
+  description: >-
+    The data plane is GraphQL, so sparse fieldsets are the default — a client requests
+    exactly the fields it needs and nested objects are traversed in one round trip. No
+    separate expand/fields parameter exists or is needed.
+filtering_and_sorting:
+  supported: true
+  description: >-
+    TailorDB generates filter and sort arguments on every collection query alongside
+    aggregation. Generated from the schema, so the vocabulary is per-application.
+  source: https://docs.tailor.tech/guides/tailordb/auto-generated-api
+metadata:
+  custom_fields: >-
+    Schema-defined. Applications declare their own TailorDB tables and fields; there is
+    no platform-wide metadata bag.
+request_tracing:
+  request_id_header: not-documented
+  observability: >-
+    A Telemetry Router service ships in the contract
+    (grpc/tailor-tailor-v1-telemetryrouter.proto) with OpenTelemetry documentation, so
+    traces can be exported to a customer-owned collector. No correlation-ID header is
+    documented for a single API call.
+versioning:
+  api: tailor.v1 package path in the contract
+  sdk: semver with published v2/v3 migration guides and a codemod runner
+  see: lifecycle/tailor-lifecycle.yml
+error_envelope:
+  control_plane: Connect/gRPC status code + message; per-RPC [Errors] blocks in the .proto
+  data_plane: GraphQL errors array
+  cli: JSON error envelope on stderr with a stable error.code and optional error.next / error.context
+  problem_json: false
+  see: errors/tailor-problem-types.yml
+rate_limit_signaling:
+  headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset]
+  style: IETF draft, unprefixed
+  status: 429
+  scope: executor incoming webhook endpoints
+  see: rate-limits/tailor-rate-limits.yml
+naming:
+  resource_identifier: TRN (Tailor Resource Name)
+  trn_docs: https://docs.tailor.tech/reference/concepts/trn
+  name_pattern: '^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$ for most named resources; type names use ^[A-Z][a-zA-Z0-9]{0,62}$'
+  note: >-
+    Name patterns are enforced as protovalidate constraints inline in the .proto, so a
+    client can validate locally before calling.
+content_types:
+  control_plane: [application/proto, application/json]
+  webhooks_in: [application/json, application/x-www-form-urlencoded]
+  data_plane: application/json
+dry_run_mode:
+  supported: partial
+  surface: tooling, not API
+  mechanisms:
+  - name: GitHub Actions `dry-run` input
+    detail: >-
+      The published Tailor GitHub Actions workflow takes a boolean `dry-run` input
+      (default false). With dry-run true it runs the plan job only and stops before
+      deploy; pull requests run plan only by default. The docs explicitly recommend it
+      for rollback verification.
+    source: https://docs.tailor.tech/sdk/github-actions
+  - name: tailor tailordb migration validate
+    detail: >-
+      Validates full migration history, unreviewed generated migration scripts, and
+      schema drift (local tables vs migration snapshot, remote schema vs checkpoint)
+      WITHOUT deploying. Runs the same checks `deploy` runs and exits non-zero on issues.
+    source: https://docs.tailor.tech/sdk/cli/tailordb
+  - name: tailor tailordb migration test
+    detail: Tests pending migrations with seed fixtures or cloned data in a TEMPORARY workspace.
+    source: https://docs.tailor.tech/sdk/cli/tailordb
+  - name: terraform plan
+    detail: The tailor-platform/tailor Terraform provider previews control-plane changes before apply.
+  api_parameter: none
+  note: >-
+    No dry-run, preview or validate-only PARAMETER exists on any RPC or GraphQL
+    operation. An agent calling the API directly cannot rehearse; only an operator
+    driving the CLI, the Actions workflow or Terraform can.
+reversibility:
+  grade: documented
+  detail: >-
+    The contract publishes exactly one true reversal operation and states no window for
+    it. An agent can undo a workspace deletion; it cannot undo anything else, and it
+    cannot learn from Tailor how long it has to decide.
+  write_surfaces:
+  - operation: DeleteWorkspace
+    reversal: RestoreWorkspace
+    reversal_operation_id: RestoreWorkspace
+    window: not-stated
+    grade: documented
+    guard: >-
+      Workspace carries a `delete_protection` boolean field, so deletion can be blocked
+      up front rather than reversed after the fact.
+    source: grpc/tailor-tailor-v1-service.proto
+    note: >-
+      RestoreWorkspace is published in the contract with its own [Errors] block
+      (Unauthenticated, InvalidArgument, PermissionDenied, NotFound). No documentation
+      anywhere states how long a deleted workspace remains restorable — searched the full
+      docs corpus.
+  - operation: DeleteApplication
+    reversal: none
+    window: null
+    grade: none
+    source: grpc/tailor-tailor-v1-service.proto
+  - operation: DeleteTailorDBType / TruncateTailorDBType / TruncateTailorDBTypes
+    reversal: none
+    window: null
+    grade: none
+    note: >-
+      Truncate is a destructive data operation with no published undo. The only related
+      affordance is CloneApplicationData, which copies data forward rather than restoring it.
+  - operation: DeleteOrganizationFolder / DeleteOrganizationTeam / RevokeOrganizationAccess
+    reversal: re-create or re-grant
+    window: null
+    grade: documented
+    note: >-
+      Reversible only by performing the inverse Create*/Grant* call. Not a true restore —
+      identifiers and history are not preserved.
+  - operation: TailorDB schema migration (deploy)
+    reversal: automatic rollback to the prior checkpoint on failure
+    window: >-
+      applies only to a failed migration, not to a successful one an operator later
+      regrets
+    grade: documented
+    source: https://docs.tailor.tech/sdk/services/tailordb-migration
+    note: >-
+      Docs state that on failure "the pre-migration schema changes are rolled back to the
+      prior checkpoint: tables that already existed are restored to their previous shape,
+      and tables the migration newly introduced are dropped. The workspace is left at its
+      prior checkpoint and prior schema — not half-applied." This is automatic failure
+      recovery, not an operator-initiated undo of a migration that succeeded.
+  - operation: Deployment rollback (GitHub Actions / git)
+    reversal: revert the commit or move the production tag, then redeploy
+    window: not-time-limited
+    grade: documented
+    source: https://docs.tailor.tech/sdk/github-actions
+    note: >-
+      Config is reversible through version control, and a dry-run plan can verify the
+      rollback first. The docs are explicit about the limit: "Schema and data are not
+      rolled back." Seed data is unaffected, and static-website rollbacks must be done
+      manually. So an agent can revert a configuration change but not the data change it
+      caused.
+  - operation: Data retention expiry
+    reversal: none
+    window: 3 to 90 days depending on data type
+    grade: none
+    note: >-
+      Not a write the caller makes, but the same class of irreversibility: after the
+      retention period "the data is permanently deleted from the system and cannot be
+      recovered" — docs.tailor.tech/administration/data-retention.
+  application_layer: >-
+    Reversibility of BUSINESS operations (cancel an order, reverse a receipt, void a
+    posting) is not Tailor's to define — those are generated from each customer's own
+    TailorDB schema and resolvers. This block grades the platform surface only.
+cross_references:
+  errors: errors/tailor-problem-types.yml
+  lifecycle: lifecycle/tailor-lifecycle.yml
+  authentication: authentication/tailor-authentication.yml
+  rate_limits: rate-limits/tailor-rate-limits.yml
+  data_model: data-model/tailor-data-model.yml
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/getting-started/graphql.md
+    status: 200
+  - url: https://docs.tailor.tech/llms-full.txt
+    status: 200
+  - url: https://api.github.com/repos/tailor-inc/proto/tarball/main
+    status: 200

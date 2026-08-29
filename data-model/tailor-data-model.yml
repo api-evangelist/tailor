@@ -1,0 +1,142 @@
+generated: '2026-08-29'
+method: derived
+source: grpc/tailor-tailor-v1-*.proto
+name: Tailor Platform control-plane data model
+description: >-
+  The entity graph of the Tailor Platform control plane, derived from the published
+  Protocol Buffers. Relationships are read from explicit id-reference fields
+  (organization_id, parent_folder_id, team_id, workspace_id) and from the Namespace /
+  ServiceType composition in resource.proto — not inferred from prose. The APPLICATION
+  data model is per customer: TailorDB generates it from each customer's own schema, so
+  there is no shared entity graph at that layer.
+scope: control-plane
+layers:
+- name: Account hierarchy
+  entities: [Organization, Folder, Team, TeamMember, PlatformUser]
+- name: Deployment
+  entities: [Workspace, Application, Subgraph, Service]
+- name: Services
+  entities: [TailorDBService, TailorDBType, AuthService, IdP, Resolver, Pipeline, StateFlow, Executor, Function, Workflow, SecretManager, StaticWebsite, AIGateway, TelemetryRouter, HttpAdapter, Events, Metadata, Meter]
+entities:
+- name: Organization
+  file: grpc/tailor-tailor-v1-workspace_resource.proto
+  fields: [id, name]
+  relationships:
+  - has_many: Folder
+    via: organization_id
+  - has_many: Team
+    via: organization_id
+  - has_many: Workspace
+    via: ListOrganizationWorkspaces
+  - has_many: OrganizationAccess
+    via: organization_id
+- name: Folder
+  file: grpc/tailor-tailor-v1-workspace_resource.proto
+  fields: [id, name, organization_id, parent_folder_id]
+  relationships:
+  - belongs_to: Organization
+    via: organization_id
+  - has_one: Folder
+    via: parent_folder_id
+    note: Self-referential. Empty parent_folder_id means a top-level folder in the organization.
+  - has_many: FolderAccess
+    via: folder_id
+- name: Team
+  file: grpc/tailor-tailor-v1-workspace_resource.proto
+  fields: [id, name, organization_id]
+  relationships:
+  - belongs_to: Organization
+    via: organization_id
+  - has_many: TeamMember
+    via: team_id
+- name: Workspace
+  file: grpc/tailor-tailor-v1-workspace.proto
+  fields: [id, name, region, delete_protection]
+  relationships:
+  - belongs_to: Organization
+  - has_many: Application
+  - has_many: PlatformUser
+    via: ListWorkspacePlatformUsers
+  soft_delete: true
+  restore_operation: RestoreWorkspace
+  guard_field: delete_protection
+- name: Application
+  file: grpc/tailor-tailor-v1-application_resource.proto
+  fields: [name, domain, auth_namespace, cors, allowed_ip_addresses, subgraphs, create_user_id, update_user_id, create_time, update_time, url, disable_introspection, disabled, auth_idp_config_name, http_adapters]
+  output_only_fields: [domain, create_user_id, update_user_id, create_time, update_time, url]
+  relationships:
+  - belongs_to: Workspace
+  - has_many: Subgraph
+    via: subgraphs
+  - has_many: HttpAdapter
+    via: http_adapters
+  - has_one: AuthService
+    via: auth_namespace
+  - has_one: IdPConfig
+    via: auth_idp_config_name
+  note: >-
+    Application.url is the generated GraphQL endpoint for the deployed app. Introspection
+    can be switched off per application with disable_introspection, and the whole
+    application can be disabled without deleting it.
+- name: Subgraph
+  file: grpc/tailor-tailor-v1-application_resource.proto
+  fields: [service_type, service_namespace]
+  relationships:
+  - belongs_to: Application
+  - references: Service
+    via: service_namespace + service_type
+  note: The federation seam — each platform service joins the application GraphQL API as a subgraph.
+- name: Service
+  file: grpc/tailor-tailor-v1-resource.proto
+  fields: [namespace, service_type]
+  service_types: [TAILORDB, AUTH, PIPELINE, STATEFLOW, AI, IDP]
+  relationships:
+  - has_one: Namespace
+    via: namespace
+- name: TailorDBType
+  file: grpc/tailor-tailor-v1-tailordb_resource.proto
+  relationships:
+  - belongs_to: TailorDBService
+  - has_many: TailorDBGQLPermission
+  note: >-
+    A TailorDB type is a customer-defined table. Its own fields — and therefore the
+    application-layer entity graph — are customer schema, not Tailor's.
+- name: AuthSCIMResource
+  file: grpc/tailor-tailor-v1-auth_resource.proto
+  fields: [name, tailor_db_namespace, tailor_db_type, attribute_mapping, core_schema]
+  relationships:
+  - belongs_to: AuthService
+  - references: TailorDBType
+    via: tailor_db_namespace + tailor_db_type
+  note: >-
+    The bridge between enterprise identity and application data — a SCIM resource maps
+    SCIM attribute paths onto fields of a customer TailorDB type.
+identifier_scheme:
+  name: TRN (Tailor Resource Name)
+  docs: https://docs.tailor.tech/reference/concepts/trn
+  note: >-
+    Every control-plane resource is addressable by a TRN; the MCP fetch_resource_by_trn
+    tool resolves one directly.
+query_primitives:
+  file: grpc/tailor-tailor-v1-resource.proto
+  filter:
+    shape: Filter { condition, and[], or[] } — recursive boolean tree
+    operators: [EQ, CONTAINS, GT, GE, LT, LE, NOT_CONTAINS]
+  paging:
+    direction_enum: [ASC, DESC]
+  note: >-
+    A shared, contract-level filter grammar reused across list surfaces, so a client
+    learns one query shape rather than a per-endpoint dialect.
+application_layer:
+  described_by: customer schema
+  note: >-
+    TailorDB generates queries, mutations, filters, sorting, aggregation and Relay-style
+    connections from each customer's table definitions, including relationships between
+    tables. There is no shared application entity graph to derive — the ERD is
+    per-application and viewable with `tailor tailordb erd`
+    (@tailor-platform/sdk-plugin-tailordb-erd).
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://api.github.com/repos/tailor-inc/proto/tarball/main
+    status: 200

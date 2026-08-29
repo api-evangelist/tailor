@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package tailor.v1;
+
+import "buf/validate/validate.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message WorkflowJobFunction {
+  string id = 1;
+  string name = 2;
+  string script = 3;
+  int64 version = 4;
+
+  google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // Reference to a function in the Function Registry
+  optional string script_ref = 6;
+
+  // Enable publishing job-execution events
+  // (workflow.workflow_execution.job_execution.*). Default false (opt-in).
+  bool publish_execution_events = 7;
+}
+
+// WorkflowJobFunctionSummary is the lightweight projection of WorkflowJobFunction
+// returned by list endpoints. Field tags are intentionally aligned with
+// WorkflowJobFunction so clients generated against either message can decode
+// the other on the wire. The heavy `script` (tag 3) and `script_ref` (tag 6)
+// fields are omitted; callers that need them must use the Get* endpoints.
+message WorkflowJobFunctionSummary {
+  string id = 1;
+  string name = 2;
+  int64 version = 4;
+
+  google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // Enable publishing job-execution events
+  // (workflow.workflow_execution.job_execution.*). Default false (opt-in).
+  bool publish_execution_events = 7;
+
+  reserved 3, 6;
+  reserved "script", "script_ref";
+}
+
+message ConcurrencyPolicy {
+  int32 max_concurrent_executions = 1 [(buf.validate.field).int32 = {
+    gte: 1
+    lte: 1000
+  }];
+}
+
+message RetryPolicy {
+  option (buf.validate.message).cel = {
+    id: "backoff_consistency"
+    message: "initial_backoff must be less than or equal to max_backoff"
+    expression: "this.max_retries == 0 || this.initial_backoff <= this.max_backoff"
+  };
+  option (buf.validate.message).cel = {
+    id: "initial_backoff_required"
+    message: "initial_backoff must be greater than 0 when max_retries > 0"
+    expression: "this.max_retries == 0 || this.initial_backoff > duration('0s')"
+  };
+
+  int32 max_retries = 1 [(buf.validate.field).int32 = {
+    gte: 0
+    lte: 10
+  }];
+  google.protobuf.Duration initial_backoff = 2 [(buf.validate.field).duration = {
+    gte: {seconds: 0}
+    lte: {seconds: 3600}
+  }];
+  google.protobuf.Duration max_backoff = 3 [(buf.validate.field).duration = {
+    gte: {seconds: 0}
+    lte: {seconds: 86400}
+  }];
+  double backoff_multiplier = 4 [(buf.validate.field).double.gte = 1];
+}
+
+message Workflow {
+  string id = 1;
+  string name = 2;
+  string main_job_function_name = 3;
+  map<string, int64> job_functions = 4; // key=name, value=version
+
+  google.protobuf.Timestamp created_at = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
+  google.protobuf.Timestamp updated_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  optional RetryPolicy retry_policy = 7;
+  optional ConcurrencyPolicy concurrency_policy = 8;
+
+  // Enable publishing workflow-execution events
+  // (workflow.workflow_execution.*). Default false (opt-in).
+  bool publish_execution_events = 9;
+}
+
+// WorkflowJobFunctionExecutionPolicy defines a runtime concurrency limit shared by
+// any job function invocation that specifies a matching execution_policy_key in
+// execJobFunction(). The same key can be referenced by multiple job functions
+// across different workflows; they all share the same concurrency pool within the workspace.
+message WorkflowJobFunctionExecutionPolicy {
+  string id = 1;
+  string execution_policy_key = 2;
+
+  google.protobuf.Timestamp created_at = 3 [(google.api.field_behavior) = OUTPUT_ONLY];
+  google.protobuf.Timestamp updated_at = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  // When unset, the policy registers the key as valid but applies no user-defined
+  // concurrency limit (platform hard limits still apply).
+  optional ConcurrencyPolicy concurrency_policy = 5;
+
+  // Distinct from execution_policy_key. Future policy shapes with
+  // wildcard-like keys can still expose a well-formed name here.
+  string name = 6;
+}
+
+message WorkflowJobExecution {
+  string id = 1;
+  string stacked_job_name = 2;
+  Status status = 3;
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_RUNNING = 1;
+    STATUS_SUSPEND = 2;
+    STATUS_SUCCESS = 3;
+    STATUS_FAILED = 4;
+    STATUS_WAITING = 5;
+  }
+  string execution_id = 4; // execution_id in Function Execution
+  google.protobuf.Timestamp started_at = 5;
+  google.protobuf.Timestamp finished_at = 6;
+}
+
+message WorkflowExecution {
+  string id = 1;
+  string workflow_name = 2;
+  Status status = 3;
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_PENDING = 1;
+    STATUS_PENDING_RESUME = 2;
+    STATUS_RUNNING = 3;
+    STATUS_SUCCESS = 4;
+    STATUS_FAILED = 5;
+    STATUS_PENDING_RETRY = 6;
+    STATUS_WAITING = 7;
+  }
+  repeated WorkflowJobExecution job_executions = 4;
+  google.protobuf.Timestamp started_at = 5;
+  google.protobuf.Timestamp finished_at = 6;
+  int32 retry_count = 7;
+  google.protobuf.Timestamp retry_after = 8;
+}

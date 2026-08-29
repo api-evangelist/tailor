@@ -1,0 +1,99 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/guides/auth/overview
+docs: https://docs.tailor.tech/guides/auth/overview
+name: Tailor authentication profile
+description: >-
+  Tailor separates two authentication planes. The PLATFORM plane (api.tailor.tech)
+  authenticates operators and tooling against the control-plane API with OAuth 2.0 or a
+  personal access token. The APPLICATION plane is provisioned per customer: each Tailor
+  application configures its own Auth service, its own OAuth2 clients, and optionally an
+  external IdP over OIDC or SAML.
+planes:
+- name: platform
+  host: api.tailor.tech
+  issuer: https://api.tailor.tech
+  discovery: https://api.tailor.tech/.well-known/oauth-authorization-server
+  discovery_status: 200
+  metadata_file: well-known/tailor-oauth-authorization-server.json
+  schemes:
+  - type: oauth2
+    id: platform_oauth2
+    flows:
+      authorization_code:
+        authorizationUrl: https://api.tailor.tech/oauth2/platform/authorize
+        tokenUrl: https://api.tailor.tech/oauth2/platform/token
+        pkce: required
+        pkce_methods: [S256]
+      client_credentials:
+        tokenUrl: https://api.tailor.tech/oauth2/platform/token
+      refresh_token:
+        tokenUrl: https://api.tailor.tech/oauth2/platform/token
+    revocation_endpoint: https://api.tailor.tech/oauth2/platform/revoke
+    userinfo_endpoint: https://api.tailor.tech/oauth2/platform/userinfo
+    token_endpoint_auth_methods:
+    - client_secret_basic
+    - client_secret_post
+    - none
+    dpop:
+      supported: true
+      bound_access_tokens: false
+      nonce_supported: true
+      signing_algs: [ES256, RS256]
+  - type: http
+    scheme: bearer
+    id: personal_access_token
+    token_prefix: tpp_
+    description: >-
+      Personal Access Token. Created with `tailor user pat create <name>` (or
+      `npx @tailor-platform/tailor-mcp auth pat create --name mcp --scopes write --scopes read`)
+      and supplied as a Bearer token, or via the TAILOR_TOKEN environment variable for
+      MCP clients that cannot use the stored credential file.
+    scopes: [read, write]
+- name: application
+  host: per-workspace, provisioned by Tailor
+  description: >-
+    Configured in code with `defineAuth()`. Each application declares its own
+    oauth2Clients (redirectURIs, grantTypes), a userProfile mapped onto a TailorDB type,
+    machineUsers for service accounts, and an optional external identity provider.
+  schemes:
+  - type: oauth2
+    id: application_oauth2
+    description: Application-declared OAuth2 clients; grant types are chosen per client (authorization_code, refresh_token).
+    pkce: supported (DPoP + PKCE via @tailor-platform/auth-public-client)
+  - type: openIdConnect
+    id: external_idp_oidc
+    description: SSO against an external identity provider over OIDC.
+  - type: saml
+    id: external_idp_saml
+    description: SSO against an external identity provider over SAML.
+  - type: http
+    scheme: bearer
+    id: machine_user
+    description: Service accounts ("machine users") for automated processes and API access.
+  features:
+  - Built-in IdP (Preview) — Tailor can act as the identity provider itself
+  - Auth Hooks — custom logic at the BEFORE_LOGIN hook point
+  - SCIM provisioning — AuthSCIMConfig/AuthSCIMResource, bearer or OAuth2 authorized
+  - Subgraph integration — user records queryable directly through the application GraphQL API
+access_control:
+  model: role- and attribute-based
+  description: >-
+    Users are mapped to a TailorDB type with attributes (for example a role enum), and
+    access to resources is controlled from those roles and attributes. IP allowlists
+    (CIDR) can be applied at organization, folder, or application level and are enforced
+    at the routing layer before a request reaches an application.
+transport_security:
+  tls_required: true
+  encryption_at_rest: AES-256
+  encryption_in_transit: TLS
+  source: https://docs.tailor.tech/reference/security
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://api.tailor.tech/.well-known/oauth-authorization-server
+    status: 200
+  - url: https://docs.tailor.tech/guides/auth/overview.md
+    status: 200
+  - url: https://docs.tailor.tech/reference/api/api-references.md
+    status: 200

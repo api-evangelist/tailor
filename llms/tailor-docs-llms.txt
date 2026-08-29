@@ -1,0 +1,328 @@
+# Tailor Platform Documentation
+
+> Tailor is a headless ERP platform. These docs cover the SDK, AppShell UI framework, platform services (TailorDB, Resolver, StateFlow, Executor, Auth), and administration.
+
+Guides, concepts, and reference for building ERP applications on the Tailor Platform.
+
+## Table of Contents
+
+### Concepts
+
+- [Authentication](https://docs.tailor.tech/app-shell/concepts/authentication.md): Set up OAuth2/OIDC authentication with Tailor Platform's Auth service using the AuthProvider component
+- [File-Based Routing](https://docs.tailor.tech/app-shell/concepts/file-based-routing.md): Define pages via directory structure using the Vite plugin instead of explicit module configuration
+- [Modules and Resources](https://docs.tailor.tech/app-shell/concepts/modules-and-resources.md): Learn how to structure your AppShell application using modules and resources for automatic routing, navigation, and breadcrumbs
+- [Routing and Navigation](https://docs.tailor.tech/app-shell/concepts/routing-navigation.md): Learn how to navigate between pages using React Router hooks and components re-exported from AppShell
+- [Sidebar Navigation](https://docs.tailor.tech/app-shell/concepts/sidebar-navigation.md): Learn how to customize sidebar navigation with auto-generation or composition mode
+- [Styling and Theming](https://docs.tailor.tech/app-shell/concepts/styling-theming.md): Learn how to style your AppShell application using Tailwind CSS v4 and customize the theme
+
+### Components
+
+- [ActionPanel](https://docs.tailor.tech/app-shell/components/action-panel.md): Display a title and a vertical list of actions with per-row loading and disabled states
+- [ActivityCard](https://docs.tailor.tech/app-shell/components/activity-card.md): Timeline of recent document activities with avatars and overflow dialog
+- [Alert](https://docs.tailor.tech/app-shell/components/alert.md): Contextual status messages with automatic variant icons
+- [AppShell](https://docs.tailor.tech/app-shell/components/app-shell.md): The root component that provides routing, navigation, and theming for your application
+- [AppearanceSwitcher](https://docs.tailor.tech/app-shell/components/appearance-switcher.md): Pre-built dropdown for toggling the application color theme
+- [Attachment](https://docs.tailor.tech/app-shell/components/attachment.md): Attachment list with upload, previews, and per-item actions; compose with Card for titles and surface styling
+- [Autocomplete](https://docs.tailor.tech/app-shell/components/autocomplete.md): Text input with a suggestion list — value is the raw input string, not a discrete item selection
+- [Avatar](https://docs.tailor.tech/app-shell/components/avatar.md): User avatar with image and fallback (Base UI)
+- [Badge](https://docs.tailor.tech/app-shell/components/badge.md): Display status, labels, and tags with customizable variants
+- [Button](https://docs.tailor.tech/app-shell/components/button.md): Styled button with multiple variants and sizes
+- [Card](https://docs.tailor.tech/app-shell/components/card.md): General-purpose container with consistent styling using a compound component API
+- [Checkbox](https://docs.tailor.tech/app-shell/components/checkbox.md): Styled checkbox for boolean form fields, with indeterminate state and automatic Field / React Hook Form integration
+- [Combobox](https://docs.tailor.tech/app-shell/components/combobox.md): Searchable combobox with single/multi selection, built-in filtering, async data fetching, and user-creatable items
+- [CommandPalette](https://docs.tailor.tech/app-shell/components/command-palette.md): Keyboard-driven quick navigation with fuzzy search for all routes in your application
+- [CsvImporter](https://docs.tailor.tech/app-shell/components/csv-importer.md): Guided multi-step CSV import flow with drag-and-drop upload, column mapping, validation, and inline error correction
+- [DataTable](https://docs.tailor.tech/app-shell/components/data-table.md): Compound data table component with sortable columns, filter chips, cursor-based pagination, row actions, and multi-row selection
+- [DatePicker](https://docs.tailor.tech/app-shell/components/date-picker.md): Accessible date input components (@internationalized/date + Base UI)
+- [DefaultHeader](https://docs.tailor.tech/app-shell/components/default-header.md): The built-in SidebarLayout top bar, extensible via an actions slot
+- [DefaultSidebar](https://docs.tailor.tech/app-shell/components/default-sidebar.md): Pre-built sidebar component that renders navigation from AppShell modules
+- [DescriptionCard](https://docs.tailor.tech/app-shell/components/description-card.md): Display structured key-value information in a responsive grid layout with automatic field rendering
+- [Dialog](https://docs.tailor.tech/app-shell/components/dialog.md): Modal dialog with a compound component API
+- [DocumentProgressCard](https://docs.tailor.tech/app-shell/components/document-progress-card.md): Generic card visualising a document's lifecycle state — optional percentage, stacked progress bar, and status legend
+- [Form, Field, and Fieldset](https://docs.tailor.tech/app-shell/components/form.md): Components for building validated forms with automatic accessibility wiring, validation state management, and optional React Hook Form integration
+- [Grid](https://docs.tailor.tech/app-shell/components/grid.md): Generic CSS-Grid layout primitive for equal or custom-width columns with responsive reflow, auto-fit, and spanning
+- [Input](https://docs.tailor.tech/app-shell/components/input.md): Styled text input with consistent theming
+- [Layout](https://docs.tailor.tech/app-shell/components/layout.md): Responsive column layout component for organizing page content in 1, 2, or 3 columns
+- [Menu](https://docs.tailor.tech/app-shell/components/menu.md): Dropdown menu with a compound component API, supporting checkbox/radio items, groups, separators, and nested sub-menus
+- [MetricCard](https://docs.tailor.tech/app-shell/components/metric-card.md): Compact card for dashboard KPI summaries with title, value, optional trend and description
+- [Select](https://docs.tailor.tech/app-shell/components/select.md): Single or multi-select dropdown with optional async data fetching
+- [Sheet](https://docs.tailor.tech/app-shell/components/sheet.md): Slide-in panel backed by a Drawer with native swipe-to-dismiss support
+- [SidebarGroup](https://docs.tailor.tech/app-shell/components/sidebar-group.md): Collapsible group component for organizing sidebar navigation items with icons and nested structure
+- [SidebarItem](https://docs.tailor.tech/app-shell/components/sidebar-item.md): Individual navigation item for customizing sidebar with icons, active states, and external links
+- [SidebarLayout](https://docs.tailor.tech/app-shell/components/sidebar-layout.md): The default layout component with sidebar navigation, breadcrumbs, and theme toggle
+- [Table](https://docs.tailor.tech/app-shell/components/table.md): Semantic HTML table with pre-styled sub-components
+- [Tabs](https://docs.tailor.tech/app-shell/components/tabs.md): Tab navigation with a compound component API
+- [Timeline](https://docs.tailor.tech/app-shell/components/timeline.md): Composable primitives for building time-based layouts with axis guides, row backgrounds, intervals, and dependency links
+- [Tooltip](https://docs.tailor.tech/app-shell/components/tooltip.md): Hover/focus tooltip with configurable placement and shared delay via Tooltip.Provider
+- [WithGuard](https://docs.tailor.tech/app-shell/components/with-guard.md): Conditionally render UI elements based on guard evaluation with support for async permissions checks
+
+### API
+
+- [createAIGatewayClient](https://docs.tailor.tech/app-shell/api/create-ai-gateway-client.md): Create a low-level AI Gateway client that reuses AppShell authentication
+- [createTypedPaths](https://docs.tailor.tech/app-shell/api/create-typed-paths.md): Generate type-safe route paths from file-based routing
+- [defineI18nLabels](https://docs.tailor.tech/app-shell/api/define-i18n-labels.md): Define internationalized labels for multi-language support
+- [defineModule](https://docs.tailor.tech/app-shell/api/define-module.md): Define a top-level module that appears in the main navigation
+- [defineResource](https://docs.tailor.tech/app-shell/api/define-resource.md): Define a nested resource (page) within a module
+- [useAIChat](https://docs.tailor.tech/app-shell/api/use-ai-chat.md): Simple text-only chat hook for AI Gateway
+- [useAppShell](https://docs.tailor.tech/app-shell/api/use-app-shell.md): Hook to access AppShell context data and configuration
+- [useAppShellConfig](https://docs.tailor.tech/app-shell/api/use-app-shell-config.md): Hook to access AppShell configuration data
+- [useAppShellData](https://docs.tailor.tech/app-shell/api/use-app-shell-data.md): Hook to access custom context data passed to AppShell
+- [useAuth](https://docs.tailor.tech/app-shell/api/use-auth.md): Hook for accessing authentication state and methods
+- [useOverrideBreadcrumb](https://docs.tailor.tech/app-shell/api/use-override-breadcrumb.md): Hook for dynamically overriding breadcrumb titles from within page components
+- [usePageMeta](https://docs.tailor.tech/app-shell/api/use-page-meta.md): Hook to resolve page metadata from route path
+- [useRegisterCommandPaletteActions](https://docs.tailor.tech/app-shell/api/use-register-command-palette-actions.md): Hook for registering contextual page actions into the CommandPalette
+- [useResolvedLocale](https://docs.tailor.tech/app-shell/api/use-resolved-locale.md): Hook to access the full BCP-47 locale and language code from AppShell context
+- [useRouteError](https://docs.tailor.tech/app-shell/api/use-route-error.md): Hook to access error details in custom error boundaries
+- [useTheme](https://docs.tailor.tech/app-shell/api/use-theme.md): Hook for accessing and controlling theme (light/dark mode)
+- [useTimeZone](https://docs.tailor.tech/app-shell/api/use-time-zone.md): Hook to access the configured IANA timezone from AppShell context
+- [useToast](https://docs.tailor.tech/app-shell/api/use-toast.md): Hook for displaying toast notifications
+
+#### Guards
+
+- [Guards Overview](https://docs.tailor.tech/app-shell/api/guards/overview.md): Access control system for routes and components using guard functions
+- [hidden](https://docs.tailor.tech/app-shell/api/guards/hidden.md): Guard function that denies access and returns 404 Not Found
+- [pass](https://docs.tailor.tech/app-shell/api/guards/pass.md): Guard function that allows access and continues to the next guard
+- [redirectTo](https://docs.tailor.tech/app-shell/api/guards/redirect-to.md): Guard function that redirects to another page
+
+#### Router
+
+- [useLocation](https://docs.tailor.tech/app-shell/api/router/use-location.md): Hook to access current location object with pathname, search, and state
+- [useNavigate](https://docs.tailor.tech/app-shell/api/router/use-navigate.md): Hook for programmatic navigation between routes
+- [useParams](https://docs.tailor.tech/app-shell/api/router/use-params.md): Hook to access dynamic route parameters
+
+### Console
+
+- [Console](https://docs.tailor.tech/getting-started/console/overview.md)
+- [Console Features](https://docs.tailor.tech/getting-started/console/key-features.md)
+
+### Core Concepts
+
+- [Platform Architecture](https://docs.tailor.tech/getting-started/core-concepts/platform-architecture.md)
+- [Services](https://docs.tailor.tech/getting-started/core-concepts/services.md)
+- [Workspace & Application](https://docs.tailor.tech/getting-started/core-concepts/workspace-application.md)
+
+### Tailordb
+
+- [TailorDB](https://docs.tailor.tech/guides/tailordb/overview.md)
+- [Auto-generated APIs](https://docs.tailor.tech/guides/tailordb/auto-generated-api.md)
+- [Fields in schema](https://docs.tailor.tech/guides/tailordb/fields.md)
+- [File Type](https://docs.tailor.tech/guides/tailordb/file-type.md)
+- [Query filters](https://docs.tailor.tech/guides/tailordb/filters.md)
+- [Hooks (Calculated Field)](https://docs.tailor.tech/guides/tailordb/hooks.md)
+- [Indexes](https://docs.tailor.tech/guides/tailordb/indexes.md)
+- [Permission](https://docs.tailor.tech/guides/tailordb/permission.md)
+- [Relationship Field](https://docs.tailor.tech/guides/tailordb/relationships.md)
+- [Data validations](https://docs.tailor.tech/guides/tailordb/validations.md)
+- [Versioning with History Tables](https://docs.tailor.tech/guides/tailordb/versioning.md)
+
+#### Advanced Settings
+
+- [Advanced Settings](https://docs.tailor.tech/guides/tailordb/advanced-settings/overview.md)
+- [Aggregation](https://docs.tailor.tech/guides/tailordb/advanced-settings/aggregation.md)
+- [Bulk Upsert](https://docs.tailor.tech/guides/tailordb/advanced-settings/bulk-upsert.md)
+- [TailorDB CDC](https://docs.tailor.tech/guides/tailordb/advanced-settings/tailordb-cdc.md)
+- [Plural form for uncountable nouns](https://docs.tailor.tech/guides/tailordb/advanced-settings/uncountable-nouns.md)
+- [Vector Search](https://docs.tailor.tech/guides/tailordb/advanced-settings/vector-search.md)
+
+### Executor
+
+- [Executor Service](https://docs.tailor.tech/guides/executor/overview.md)
+- [Event-based Trigger](https://docs.tailor.tech/guides/executor/event-based-trigger.md)
+- [Function Operation](https://docs.tailor.tech/guides/executor/function-operation.md)
+- [Incoming Webhook Trigger](https://docs.tailor.tech/guides/executor/incoming-webhook-trigger.md)
+- [Job Function Operation](https://docs.tailor.tech/guides/executor/job-function-operation.md)
+- [Schedule-based Trigger](https://docs.tailor.tech/guides/executor/schedule-based-trigger.md)
+- [TailorGraphql Operation](https://docs.tailor.tech/guides/executor/tailor-graphql-operation.md)
+- [Webhook Operation](https://docs.tailor.tech/guides/executor/webhook-operation.md)
+- [Workflow Operation](https://docs.tailor.tech/guides/executor/workflow-operation.md)
+
+### Function
+
+- [Function service](https://docs.tailor.tech/guides/function/overview.md)
+- [Built-in interfaces](https://docs.tailor.tech/guides/function/builtin-interfaces.md)
+- [Accessing TailorDB](https://docs.tailor.tech/guides/function/accessing-tailordb.md)
+- [Appendix](https://docs.tailor.tech/guides/function/appendix.md)
+- [Debugging your function](https://docs.tailor.tech/guides/function/debugging.md)
+- [Examples](https://docs.tailor.tech/guides/function/examples.md)
+- [Managing Built-in IdP Users&#x20;](https://docs.tailor.tech/guides/function/managing-idp-users.md)
+- [Sending requests from Function service](https://docs.tailor.tech/guides/function/sending-request.md)
+
+### Auth
+
+- [Auth Service](https://docs.tailor.tech/guides/auth/overview.md)
+- [Log in to your app](https://docs.tailor.tech/guides/auth/app-login.md)
+- [AuthConnection](https://docs.tailor.tech/guides/auth/authconnection.md)
+- [Auth Hooks](https://docs.tailor.tech/guides/auth/hook.md)
+- [SCIM Provisioning](https://docs.tailor.tech/guides/auth/scim.md)
+- [OAuth2 Client Selection for SPAs](https://docs.tailor.tech/guides/auth/spa-oauth2-client.md)
+
+#### Integration
+
+- [Auth0 Integration](https://docs.tailor.tech/guides/auth/integration/auth0.md)
+- [Built-in IdP&#x20;](https://docs.tailor.tech/guides/auth/integration/built-in-idp.md)
+- [Microsoft Entra ID Integration](https://docs.tailor.tech/guides/auth/integration/entra-id.md)
+- [Google Workspace Integration&#x20;](https://docs.tailor.tech/guides/auth/integration/google-workspace.md)
+- [Okta Integration](https://docs.tailor.tech/guides/auth/integration/okta.md)
+
+### Integration
+
+- [Integration Guides for Tailor Platform](https://docs.tailor.tech/guides/integration/overview.md)
+- [Integrate Claude and Claude Code with Tailor Platform&#x20;](https://docs.tailor.tech/guides/integration/claude.md)
+- [Integrate Loop with Tailor Platform](https://docs.tailor.tech/guides/integration/loopreturns.md)
+- [Integration Guides for Tailor Platform](https://docs.tailor.tech/guides/integration/pipedream-shopify.md)
+- [Integrate QuickBooks with Tailor Platform](https://docs.tailor.tech/guides/integration/quickbooks.md)
+- [Integrate ShipStation with Tailor Platform](https://docs.tailor.tech/guides/integration/shipstation.md)
+- [Integrate Shopify with Tailor Platform](https://docs.tailor.tech/guides/integration/shopify.md)
+
+### Workflow
+
+- [Creating Workflows](https://docs.tailor.tech/guides/workflow/creating-workflows.md)
+- [Monitoring Executions](https://docs.tailor.tech/guides/workflow/monitoring-executions.md)
+- [Triggering Workflow](https://docs.tailor.tech/guides/workflow/triggering-workflow.md)
+- [Wait / Resolve](https://docs.tailor.tech/guides/workflow/wait-resolve.md)
+
+### API
+
+- [API References](https://docs.tailor.tech/reference/api/api-references.md)
+- [CEL scripting](https://docs.tailor.tech/reference/api/cel-scripting.md)
+- [JavaScript](https://docs.tailor.tech/reference/api/js-scripting.md)
+
+### Platform
+
+- [Outgoing IP Addresses](https://docs.tailor.tech/reference/platform/outgoing-ip-addresses.md)
+- [Platform Limits](https://docs.tailor.tech/reference/platform/platform-limits.md)
+- [Service Lifecycle Policy](https://docs.tailor.tech/reference/platform/service-lifecycle-policy.md)
+- [Timeouts](https://docs.tailor.tech/reference/platform/timeouts.md)
+
+### Concepts
+
+- [Tailor Platform terminology and concepts chart](https://docs.tailor.tech/reference/concepts/terminology_concepts.md)
+- [Tailor Resource Name (TRN)](https://docs.tailor.tech/reference/concepts/trn.md)
+
+### Infrastructure
+
+- [Terraform Import](https://docs.tailor.tech/reference/infrastructure/terraform-import.md)
+
+### CLI
+
+- [Application Commands](https://docs.tailor.tech/sdk/cli/application.md)
+- [Auth Resource Commands](https://docs.tailor.tech/sdk/cli/auth.md)
+- [Completion](https://docs.tailor.tech/sdk/cli/completion.md)
+- [Crash Report Commands](https://docs.tailor.tech/sdk/cli/crashreport.md)
+- [Executor Commands](https://docs.tailor.tech/sdk/cli/executor.md)
+- [Function Commands](https://docs.tailor.tech/sdk/cli/function.md)
+- [Untitled](https://docs.tailor.tech/sdk/cli/organization.md)
+- [Untitled](https://docs.tailor.tech/sdk/cli/plugin.md)
+- [Untitled](https://docs.tailor.tech/sdk/cli/query.md)
+- [Secret Commands](https://docs.tailor.tech/sdk/cli/secret.md)
+- [Untitled](https://docs.tailor.tech/sdk/cli/skills.md)
+- [Static Website Commands](https://docs.tailor.tech/sdk/cli/staticwebsite.md)
+- [TailorDB Commands](https://docs.tailor.tech/sdk/cli/tailordb.md)
+- [Untitled](https://docs.tailor.tech/sdk/cli/upgrade.md)
+- [User & Auth Commands](https://docs.tailor.tech/sdk/cli/user.md)
+- [Workflow Commands](https://docs.tailor.tech/sdk/cli/workflow.md)
+- [Workspace Commands](https://docs.tailor.tech/sdk/cli/workspace.md)
+
+### Migration
+
+- [Migrating to v2](https://docs.tailor.tech/sdk/migration/v2.md)
+- [Migrating to v3](https://docs.tailor.tech/sdk/migration/v3.md)
+
+### Plugin
+
+- [Custom Plugins (Beta)](https://docs.tailor.tech/sdk/plugin/custom.md)
+
+### Services
+
+- [AI Gateway](https://docs.tailor.tech/sdk/services/aigateway.md)
+- [Auth](https://docs.tailor.tech/sdk/services/auth.md)
+- [Executor](https://docs.tailor.tech/sdk/services/executor.md)
+- [HTTP Adapter](https://docs.tailor.tech/sdk/services/http-adapter.md)
+- [IdP (Identity Provider)](https://docs.tailor.tech/sdk/services/idp.md)
+- [Resolver](https://docs.tailor.tech/sdk/services/resolver.md)
+- [Secret Manager](https://docs.tailor.tech/sdk/services/secret.md)
+- [Static Website](https://docs.tailor.tech/sdk/services/staticwebsite.md)
+- [TailorDB](https://docs.tailor.tech/sdk/services/tailordb.md)
+- [TailorDB Migrations](https://docs.tailor.tech/sdk/services/tailordb-migration.md)
+- [Workflow](https://docs.tailor.tech/sdk/services/workflow.md)
+
+### Develop From Scratch
+
+- [Develop from Scratch with Tailor Platform SDK](https://docs.tailor.tech/tutorials/develop-from-scratch/overview.md)
+- [Step 1: Create Database Schema](https://docs.tailor.tech/tutorials/develop-from-scratch/step-01.md)
+- [Step 2: Add Authentication and Permissions](https://docs.tailor.tech/tutorials/develop-from-scratch/step-02.md)
+- [Step 3: Add Resolver](https://docs.tailor.tech/tutorials/develop-from-scratch/step-03.md)
+- [Step 4: Add Executor](https://docs.tailor.tech/tutorials/develop-from-scratch/step-04.md)
+
+### Manage Data Schema
+
+- [Managing Data Schema with Tailor Platform](https://docs.tailor.tech/tutorials/manage-data-schema/overview.md)
+- [Adding a New Data Model](https://docs.tailor.tech/tutorials/manage-data-schema/create-data-schema.md)
+- [Data Schema in Tailor Platform](https://docs.tailor.tech/tutorials/manage-data-schema/data-schema-basics.md)
+- [Import CSV files](https://docs.tailor.tech/tutorials/manage-data-schema/import-csv-file.md)
+- [Adding a New Field to Data Model](https://docs.tailor.tech/tutorials/manage-data-schema/modify-data-schema.md)
+- [Validate Field Data](https://docs.tailor.tech/tutorials/manage-data-schema/validate-field-data.md)
+
+### Setup Auth
+
+- [Setting up Auth](https://docs.tailor.tech/tutorials/setup-auth/overview.md)
+- [Set up your Identity Provider](https://docs.tailor.tech/tutorials/setup-auth/setup-identity-provider.md)
+- [Register Identity provider with Auth service](https://docs.tailor.tech/tutorials/setup-auth/register-identity-provider.md)
+- [Setting up Auth Connections](https://docs.tailor.tech/tutorials/setup-auth/setup-auth-connections.md)
+
+#### Login
+
+- [Using OAuth2 to log in to the Tailor PF app](https://docs.tailor.tech/tutorials/setup-auth/login/create-oauth2-client.md)
+- [Create Users in Your Application](https://docs.tailor.tech/tutorials/setup-auth/login/create-user.md)
+- [Using ID Token](https://docs.tailor.tech/tutorials/setup-auth/login/id-token.md)
+
+### Setup Executor
+
+- [Setting up the Executor](https://docs.tailor.tech/tutorials/setup-executor/overview.md)
+- [Setting up an Event-based Trigger](https://docs.tailor.tech/tutorials/setup-executor/event-based-trigger.md)
+- [Setting up an Incoming Webhook Trigger](https://docs.tailor.tech/tutorials/setup-executor/incoming-webhook-trigger.md)
+- [Setting up a Schedule-based Trigger](https://docs.tailor.tech/tutorials/setup-executor/schedule-based-trigger.md)
+
+### Other
+
+- [@tailor-platform/app-shell](https://docs.tailor.tech/app-shell/changelog.md)
+- [Adding Application Endpoints](https://docs.tailor.tech/tutorials/app-endpoint.md)
+- [Administration](https://docs.tailor.tech/administration.md)
+- [AI Gateway&#x20;](https://docs.tailor.tech/guides/ai-gateway.md)
+- [Application](https://docs.tailor.tech/guides/application.md)
+- [Changelog](https://docs.tailor.tech/reference/changelog.md): Latest updates and releases for Tailor Platform
+- [Character Encodings](https://docs.tailor.tech/reference/character-encodings.md)
+- [Configuration](https://docs.tailor.tech/sdk/configuration.md)
+- [Core Concepts](https://docs.tailor.tech/getting-started/core-concepts.md)
+- [Creating Custom Resolvers](https://docs.tailor.tech/tutorials/resolver.md)
+- [Customer Support](https://docs.tailor.tech/administration/support.md)
+- [Data Retention](https://docs.tailor.tech/administration/data-retention.md)
+- [Design Philosophy](https://docs.tailor.tech/app-shell/design-philosophy.md): The design principles and tradeoffs behind AppShell's architecture.
+- [Development Workflow](https://docs.tailor.tech/tutorials/development-workflow.md)
+- [Events and Payloads](https://docs.tailor.tech/guides/events.md)
+- [Getting Started](https://docs.tailor.tech/getting-started.md)
+- [GitHub Actions Integration](https://docs.tailor.tech/sdk/github-actions.md)
+- [Guides](https://docs.tailor.tech/guides.md)
+- [Interacting with Tailor Platform GraphQL](https://docs.tailor.tech/getting-started/graphql.md)
+- [Introduction](https://docs.tailor.tech/app-shell.md): AppShell is an opinionated React application framework for creating applications on Tailor Platform with built-in authentication, routing, and beautiful UI components.
+- [IP Restriction](https://docs.tailor.tech/administration/ip-restriction.md)
+- [Migrations](https://docs.tailor.tech/app-shell/migrations.md): Breaking changes and required migration steps for AppShell upgrades, newest first
+- [Multi-Environment Configuration](https://docs.tailor.tech/sdk/multi-environment.md)
+- [Observability / OpenTelemetry](https://docs.tailor.tech/guides/opentelemetry.md)
+- [Platform Account management](https://docs.tailor.tech/administration/account-management.md)
+- [Plugins (Beta)](https://docs.tailor.tech/sdk/plugin.md)
+- [Quick Start](https://docs.tailor.tech/app-shell/quickstart.md): Install and set up your first AppShell application
+- [Quickstart](https://docs.tailor.tech/getting-started/quickstart.md)
+- [Quickstart](https://docs.tailor.tech/sdk/quickstart.md)
+- [Reference](https://docs.tailor.tech/reference.md)
+- [Resolver](https://docs.tailor.tech/guides/resolver.md)
+- [Runtime API](https://docs.tailor.tech/sdk/runtime.md)
+- [SDK](https://docs.tailor.tech/sdk.md)
+- [Secret Manager](https://docs.tailor.tech/guides/secretmanager.md)
+- [Security](https://docs.tailor.tech/reference/security.md): Tailor Platform Security
+- [Static Website Hosting](https://docs.tailor.tech/guides/static-website-hosting.md)
+- [tailor](https://docs.tailor.tech/sdk/cli-reference.md)
+- [Testing Guide](https://docs.tailor.tech/sdk/testing.md)
+- [Tutorials](https://docs.tailor.tech/tutorials.md)
+- [Workflow Service](https://docs.tailor.tech/guides/workflow.md)
+- [Workspace Administration](https://docs.tailor.tech/administration/workspace.md)

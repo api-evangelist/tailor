@@ -1,0 +1,114 @@
+generated: '2026-08-29'
+method: searched
+source: https://docs.tailor.tech/app-shell/changelog
+name: Tailor change history
+description: >-
+  Tailor's dated change history lives in per-package changelogs and GitHub releases, not
+  in one platform changelog. The docs site has a Changelog page, but as of this probe it
+  renders "No releases found for All. Showing 0 of 0 releases" for every tab — the
+  platform-wide changelog surface exists and is empty.
+scheme: semver, per package (changesets-style entries with Major/Minor/Patch sections)
+sources:
+- name: AppShell changelog (docs)
+  url: https://docs.tailor.tech/app-shell/changelog
+  status: 200
+  machine_readable: true
+  note: The only changelog rendered inside the documentation with real content. 16KB of dated, versioned entries.
+- name: SDK GitHub releases
+  url: https://github.com/tailor-platform/sdk/releases
+  status: 200
+  note: Per-package release tags for sdk, create-sdk, sdk-codemod, sdk-plugin-* — the highest-cadence surface.
+- name: tailorctl GitHub releases
+  url: https://github.com/tailor-platform/tailorctl/releases
+  status: 200
+- name: Docs changelog page
+  url: https://docs.tailor.tech/reference/changelog
+  status: 200
+  empty: true
+  note: >-
+    Renders "No releases found for All. Showing 0 of 0 releases" across the All / SDK /
+    AppShell tabs. The page is wired up but carries no entries.
+- name: Release notes (marketing)
+  url: https://updates.tailor.tech/
+  status: 200
+  note: 301s to www.tailor.tech/resources?filter=release-notes, which shows the general blog listing.
+current_versions:
+  sdk: 2.7.0
+  app_shell: 1.12.0
+  erp_kit: 0.57.0
+  tailorctl: v2.11.1
+  terraform_provider: 2.18.0
+entries:
+- component: '@tailor-platform/sdk'
+  version: 2.7.0
+  date: '2026-08-27'
+  breaking: false
+- component: '@tailor-platform/sdk'
+  version: 2.6.0
+  date: '2026-08-25'
+  breaking: false
+- component: '@tailor-platform/sdk'
+  version: 2.5.0
+  date: '2026-08-23'
+  breaking: false
+- component: '@tailor-platform/sdk'
+  version: 2.4.0
+  date: '2026-08-17'
+  breaking: false
+- component: '@tailor-platform/sdk'
+  version: 2.3.0
+  date: '2026-08-14'
+  breaking: false
+- component: '@tailor-platform/sdk'
+  version: 1.85.1
+  date: '2026-08-12'
+  breaking: false
+  note: Last 1.x release before the 2.x line; a v2 migration guide and a codemod runner accompany the major.
+- component: '@tailor-platform/app-shell'
+  version: 1.12.0
+  date: '2026-08-19'
+  breaking: false
+  highlights:
+  - Added a `render` escape hatch to DescriptionCard fields so custom rendering no longer requires a new built-in field type.
+- component: '@tailor-platform/app-shell'
+  version: 1.11.0
+  date: '2026-08-12'
+  breaking: false
+- component: '@tailor-platform/app-shell'
+  version: 1.10.1
+  date: '2026-07-31'
+  breaking: false
+- component: '@tailor-platform/app-shell'
+  version: 1.10.0
+  date: '2026-07-29'
+  breaking: false
+- component: tailorctl
+  version: v2.11.1
+  date: '2026-07-23'
+  breaking: false
+- component: tailorctl
+  version: v2.11.0
+  date: '2026-06-09'
+  breaking: false
+cadence:
+  sdk: multiple minor releases per month (five 2.x minors in August 2026 alone)
+  app_shell: roughly twice monthly
+  tailorctl: roughly monthly to bimonthly
+major_migrations:
+- from: v1
+  to: v2
+  guide: https://docs.tailor.tech/sdk/migration/v2
+- from: v2
+  to: v3
+  guide: https://docs.tailor.tech/sdk/migration/v3
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://docs.tailor.tech/app-shell/changelog.md
+    status: 200
+  - url: https://docs.tailor.tech/reference/changelog
+    status: 200
+  - url: https://api.github.com/repos/tailor-platform/sdk/releases
+    status: 200
+  - url: https://api.github.com/repos/tailor-platform/tailorctl/releases
+    status: 200

@@ -1,0 +1,66 @@
+generated: '2026-08-29'
+method: searched
+source: https://github.com/tailor-inc/proto
+name: Tailor Platform Protocol Buffers
+description: >-
+  Tailor publishes the full control-plane contract for the Tailor Platform as Protocol
+  Buffers in the tailor-inc/proto repository, and mirrors the module on the Buf Schema
+  Registry at buf.build/tailor-inc/tailor. The APIs are served over ConnectRPC, so the
+  same definitions are callable as both gRPC and plain HTTP. This is Tailor's
+  machine-readable API contract; the company publishes no OpenAPI/Swagger description.
+ownership:
+  justification: >-
+    The proto repository lives in the tailor-inc GitHub organization, is linked as the
+    canonical API definition from Tailor's own developer docs at
+    docs.tailor.tech/reference/api/api-references, and its README links back to
+    https://www.tailor.tech/ and https://docs.tailor.tech/. Different org name
+    (tailor-inc vs tailor-platform) is Tailor's own split: tailor-inc holds the
+    protocol/schema repos, tailor-platform holds the client tooling, and the
+    tailor-platform SDK/tailorctl/terraform-provider repos are named in the proto
+    README as the official client libraries for these definitions.
+  hosts:
+  - github.com/tailor-inc/proto
+  - buf.build/tailor-inc/tailor
+registry:
+  buf_module: buf.build/tailor-inc/tailor
+  buf_url: https://buf.build/tailor-inc/tailor
+  buf_status: 200
+transport:
+  protocols:
+  - gRPC
+  - Connect (HTTP/JSON)
+  framework: ConnectRPC
+  note: >-
+    Docs state "Using ConnectRPC, we support both gRPC and HTTP protocols" —
+    docs.tailor.tech/reference/api/api-references.
+services:
+- name: OperatorService
+  file: grpc/tailor-tailor-v1-service.proto
+  package: tailor.v1
+  rpc_count: 254
+  description: >-
+    Unified control-plane API for managing organizations, folders, teams, workspaces,
+    applications, and every platform component (TailorDB, Auth, IdP, Resolver/Pipeline,
+    Executor, Function, Workflow, StateFlow, Secret Manager, Static Website, AI Gateway,
+    Telemetry Router, HTTP Adapter, Events, Metadata).
+files:
+  count: 38
+  directory: grpc/
+  note: >-
+    Copied verbatim from the repository tarball (commit 0a7c97c, fetched 2026-08-29).
+    File names are flattened with the repo-relative path joined by hyphens so the
+    original tailor/v1/*.proto layout stays recoverable.
+dependencies:
+- buf.build/bufbuild/protovalidate
+- buf.build/googleapis/googleapis
+governance:
+  lint: buf STANDARD + COMMENT_RPC + PACKAGE_NO_IMPORT_CYCLE
+  breaking_change_detection: buf breaking (FILE)
+  note: >-
+    buf.yaml declares lint and breaking-change rules for the public module, so the
+    contract is machine-governed in CI rather than hand-maintained.
+license: See grpc/ — LICENSE ships in the upstream repository.
+x-evidence:
+  fetched: '2026-08-29'
+  url: https://api.github.com/repos/tailor-inc/proto/tarball/main
+  http_status: 200

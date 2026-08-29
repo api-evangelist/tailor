@@ -1,0 +1,44 @@
+generated: '2026-08-29'
+method: searched
+source: https://api.tailor.tech/.well-known/oauth-authorization-server
+docs: https://docs.tailor.tech/guides/auth/overview
+name: Tailor OAuth scopes and grants
+description: >-
+  Tailor's platform authorization server publishes RFC 8414 metadata but does NOT
+  advertise a scopes_supported list. The only scope vocabulary Tailor documents is the
+  two-value read/write pair attached to personal access tokens. Application-level OAuth2
+  clients declare their own grant types in code; scope names are chosen by the customer
+  building the application, not by Tailor, so there is no platform-wide scope catalog to
+  harvest.
+authorization_server: https://api.tailor.tech
+scopes_supported_published: false
+scopes:
+- name: read
+  description: Read access for a Tailor personal access token.
+  surface: personal-access-token
+  source: https://github.com/tailor-platform/tailor-mcp#authentication
+- name: write
+  description: Write access for a Tailor personal access token.
+  surface: personal-access-token
+  source: https://github.com/tailor-platform/tailor-mcp#authentication
+grant_types_supported:
+- authorization_code
+- refresh_token
+- client_credentials
+response_types_supported:
+- code
+code_challenge_methods_supported:
+- S256
+gaps:
+- >-
+  scopes_supported is absent from the published authorization server metadata, so an
+  agent cannot discover the platform scope vocabulary without documentation.
+- >-
+  Application OAuth2 clients are declared with redirectURIs and grantTypes in
+  `defineAuth()`; the docs show no scope parameter, so per-application authorization is
+  expressed through roles and attributes rather than OAuth scopes.
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://api.tailor.tech/.well-known/oauth-authorization-server
+    status: 200

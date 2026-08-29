@@ -1,0 +1,85 @@
+generated: '2026-08-29'
+method: searched
+source: https://github.com/tailor-platform/tailor-mcp
+name: Tailor Platform MCP Server
+description: >-
+  Tailor ships a first-party MCP server inside the tailorctl CLI. It is distributed as
+  the npm installer @tailor-platform/tailor-mcp, which downloads the platform-appropriate
+  tailorctl binary and runs it in MCP mode. There is no vendor-hosted remote endpoint —
+  an operator installs and runs the server themselves, either over stdio or by starting
+  the built-in HTTP transport on a host they control.
+status: published
+deployment:
+  mode: local-stdio
+  install: npx -y @tailor-platform/tailor-mcp mcp
+  package: https://www.npmjs.com/package/@tailor-platform/tailor-mcp
+  auth: api-key
+  verified: searched
+  note: >-
+    Client config published in the repository README uses command "npx" with args
+    ["-y", "@tailor-platform/tailor-mcp", "mcp"] and a TAILOR_TOKEN env var. The README
+    also documents `npx tailorctl mcp --transport=http --listen=0.0.0.0:9000`, which is
+    a SELF-HOSTED HTTP transport the operator starts, not a Tailor-operated URL. No
+    endpoint field is recorded because Tailor publishes none.
+authentication:
+  method: Personal Access Token
+  env_var: TAILOR_TOKEN
+  token_prefix: tpp_
+  obtain: npx @tailor-platform/tailor-mcp auth pat create --name mcp --scopes write --scopes read
+  alternative: npx @tailor-platform/tailor-mcp auth login (credentials stored in ~/.tailorctl)
+  scopes:
+  - read
+  - write
+tools:
+- name: create_resource
+  description: Creates resources of various types.
+  category: resource-management
+- name: update_resource
+  description: Updates resources of various types.
+  category: resource-management
+- name: destroy_resource
+  description: Destroys resources of various types.
+  category: resource-management
+- name: fetch_resource_by_trn
+  description: Fetches a resource by its Tailor Resource Name (TRN).
+  category: resource-management
+- name: search_resource
+  description: Searches resources by workspace ID and resource type.
+  category: resource-management
+- name: query_graphql
+  description: Executes a GraphQL query against a Tailor application.
+  category: data
+- name: graphql_sdl
+  description: Fetches the GraphQL SDL for a Tailor application.
+  category: schema
+tool_count: 7
+tool_source:
+  method: searched
+  url: https://github.com/tailor-platform/tailor-mcp#features
+  note: >-
+    Tool names and descriptions are the provider's own published list. Full inputSchema
+    was NOT captured: the server is stdio-only and requires a Tailor account plus a
+    tpp_ personal access token before tools/list will answer, so live introspection is
+    auth-gated. No schemas were invented.
+live_introspection:
+  attempted: false
+  reason: >-
+    No remote endpoint exists to POST tools/list to. The server runs locally under an
+    authenticated tailorctl session, which this pipeline does not hold.
+currency:
+  npm_version: 0.0.2
+  npm_published: '2025-04-14'
+  repository_pushed: '2026-08-17'
+  tailorctl_version: v2.11.1
+  tailorctl_published: '2026-07-23'
+  note: >-
+    The npm installer is the stale surface. It has not been republished since 2025-04-14
+    even though the binary it installs and the repository behind it are both current —
+    so `npx -y @tailor-platform/tailor-mcp` resolves to a 16-month-old installer script.
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://api.github.com/repos/tailor-platform/tailor-mcp/readme
+    status: 200
+  - url: https://registry.npmjs.org/@tailor-platform/tailor-mcp
+    status: 200

@@ -1,0 +1,188 @@
+generated: '2026-08-29'
+method: searched
+source: https://registry.npmjs.org/-/v1/search?text=@tailor-platform
+name: Tailor client libraries and tooling
+description: >-
+  First-party Tailor Platform packages. The @tailor-platform npm scope is the primary
+  distribution channel; tailorctl (the Go CLI) ships as GitHub releases and a Homebrew
+  tap, and the Terraform provider ships through the HashiCorp registry.
+package_count: 17
+official_count: 17
+packages:
+- name: '@tailor-platform/sdk'
+  registry: npm
+  official: true
+  version: 2.7.0
+  published: '2026-08-27'
+  url: https://www.npmjs.com/package/@tailor-platform/sdk
+  repository: https://github.com/tailor-platform/sdk
+  language: TypeScript
+  description: Tailor Platform SDK — the TypeScript SDK for defining and deploying Tailor applications. Also provides the `tailor` CLI.
+- name: '@tailor-platform/create-sdk'
+  registry: npm
+  official: true
+  version: 2.7.0
+  published: '2026-08-27'
+  url: https://www.npmjs.com/package/@tailor-platform/create-sdk
+  repository: https://github.com/tailor-platform/sdk
+  language: TypeScript
+  description: Project scaffolder — `npm create @tailor-platform/sdk`.
+- name: '@tailor-platform/app-shell'
+  registry: npm
+  official: true
+  version: 1.12.0
+  published: '2026-08-19'
+  url: https://www.npmjs.com/package/@tailor-platform/app-shell
+  repository: https://github.com/tailor-platform/app-shell
+  language: TypeScript
+  description: Opinionated React application framework for building ERP UIs on Tailor Platform.
+- name: '@tailor-platform/app-shell-vite-plugin'
+  registry: npm
+  official: true
+  version: 0.2.3
+  published: '2026-06-26'
+  url: https://www.npmjs.com/package/@tailor-platform/app-shell-vite-plugin
+  repository: https://github.com/tailor-platform/app-shell
+  language: TypeScript
+  description: Vite plugin for file-based routing in AppShell applications.
+- name: '@tailor-platform/app-shell-sdk-plugin'
+  registry: npm
+  official: true
+  version: 0.1.0
+  published: '2026-04-24'
+  url: https://www.npmjs.com/package/@tailor-platform/app-shell-sdk-plugin
+  repository: https://github.com/tailor-platform/app-shell
+  language: TypeScript
+  description: SDK plugin bridging AppShell into the Tailor SDK CLI.
+- name: '@tailor-platform/erp-kit'
+  registry: npm
+  official: true
+  version: 0.57.0
+  published: '2026-08-24'
+  url: https://www.npmjs.com/package/@tailor-platform/erp-kit
+  language: TypeScript
+  description: Opinionated ERP toolkit for building business applications on Tailor Platform.
+- name: '@tailor-platform/auth-public-client'
+  registry: npm
+  official: true
+  version: 0.6.1
+  published: '2026-08-28'
+  url: https://www.npmjs.com/package/@tailor-platform/auth-public-client
+  repository: https://github.com/tailor-platform/auth-public-client
+  language: TypeScript
+  description: Tailor Platform OAuth2 public client with DPoP + PKCE support.
+- name: '@tailor-platform/auth-browser-client'
+  registry: npm
+  official: true
+  version: 0.6.0
+  published: '2026-02-12'
+  url: https://www.npmjs.com/package/@tailor-platform/auth-browser-client
+  repository: https://github.com/tailor-inc/auth-browser-client
+  language: TypeScript
+  description: Browser client library for Tailor Platform authentication.
+- name: '@tailor-platform/sdk-codemod'
+  registry: npm
+  official: true
+  version: 0.8.1
+  published: '2026-08-27'
+  url: https://www.npmjs.com/package/@tailor-platform/sdk-codemod
+  repository: https://github.com/tailor-platform/sdk
+  language: TypeScript
+  description: Codemod runner for Tailor Platform SDK major-version upgrades.
+- name: '@tailor-platform/eslint-plugin-sdk'
+  registry: npm
+  official: true
+  version: 0.2.3
+  published: '2026-08-23'
+  url: https://www.npmjs.com/package/@tailor-platform/eslint-plugin-sdk
+  repository: https://github.com/tailor-platform/sdk
+  language: TypeScript
+  description: Lint rules for Tailor Platform SDK applications.
+- name: '@tailor-platform/sdk-plugin-seed'
+  registry: npm
+  official: true
+  version: 0.2.5
+  published: '2026-08-27'
+  url: https://www.npmjs.com/package/@tailor-platform/sdk-plugin-seed
+  repository: https://github.com/tailor-platform/sdk
+  language: TypeScript
+  description: CLI plugin providing `tailor seed` (TailorDB and IdP seed data).
+- name: '@tailor-platform/sdk-plugin-tailordb-erd'
+  registry: npm
+  official: true
+  version: 0.1.7
+  published: '2026-08-27'
+  url: https://www.npmjs.com/package/@tailor-platform/sdk-plugin-tailordb-erd
+  repository: https://github.com/tailor-platform/sdk
+  language: TypeScript
+  description: CLI plugin providing `tailor tailordb erd` (TailorDB ERD viewer).
+- name: '@tailor-platform/shopify'
+  registry: npm
+  official: true
+  version: 0.6.0
+  published: '2026-03-02'
+  url: https://www.npmjs.com/package/@tailor-platform/shopify
+  language: TypeScript
+  description: Shopify Admin API client with Tailor Platform integration.
+- name: '@tailor-platform/function-kysely-tailordb'
+  registry: npm
+  official: true
+  version: 0.1.3
+  published: '2025-10-22'
+  url: https://www.npmjs.com/package/@tailor-platform/function-kysely-tailordb
+  repository: https://github.com/tailor-platform/function
+  language: TypeScript
+  description: Kysely dialect for TailorDB.
+  note: Last published 2025-10-22 — the oldest actively-listed package in the scope.
+- name: '@tailor-platform/tailor-mcp'
+  registry: npm
+  official: true
+  version: 0.0.2
+  published: '2025-04-14'
+  url: https://www.npmjs.com/package/@tailor-platform/tailor-mcp
+  repository: https://github.com/tailor-platform/tailor-mcp
+  language: JavaScript
+  description: Installer that fetches the tailorctl binary and exposes its MCP server.
+  note: >-
+    Decay signal — the MCP installer has not been republished to npm since 2025-04-14
+    while the repository itself was pushed 2026-08-17 and the tailorctl binary it
+    installs reached v2.11.1 on 2026-07-23. The npm artifact is the stalest first-party
+    package Tailor ships and it is the one an agent host installs.
+- name: tailorctl
+  registry: github-releases
+  official: true
+  version: v2.11.1
+  published: '2026-07-23'
+  url: https://github.com/tailor-platform/tailorctl/releases
+  repository: https://github.com/tailor-platform/tailorctl
+  language: Go
+  description: Command line tool for Tailor Platform; also hosts the MCP server (`tailorctl mcp`).
+  install: brew install tailor-platform/tap/tailorctl
+  note: >-
+    No package-manager registry metadata endpoint — distributed as GitHub release
+    binaries plus the tailor-platform/homebrew-tap Homebrew tap. Version and date read
+    from the GitHub releases API.
+- name: tailor-platform/tailor
+  registry: terraform
+  official: true
+  version: 2.18.0
+  published: '2026-08-24'
+  url: https://registry.terraform.io/providers/tailor-platform/tailor/latest
+  repository: https://github.com/tailor-platform/terraform-provider-tailor
+  language: Go
+  description: Terraform provider for managing Tailor Platform resources as code.
+distribution_channels:
+- npm scope @tailor-platform
+- GitHub releases (tailor-platform/tailorctl)
+- Homebrew tap (tailor-platform/homebrew-tap)
+- Terraform Registry (tailor-platform/tailor)
+- Buf Schema Registry (buf.build/tailor-inc/tailor)
+x-evidence:
+  fetched: '2026-08-29'
+  probes:
+  - url: https://registry.npmjs.org/-/v1/search?text=@tailor-platform&size=50
+    status: 200
+  - url: https://api.github.com/repos/tailor-platform/tailorctl/releases
+    status: 200
+  - url: https://registry.terraform.io/v1/providers/tailor-platform/tailor
+    status: 200

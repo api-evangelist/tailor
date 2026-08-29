@@ -1,0 +1,42 @@
+generated: '2026-08-29'
+method: probed
+source: https://www.tailor.tech/pricing
+name: Tailor plans and pricing
+description: >-
+  Tailor publishes no pricing. There is no /pricing page, no pricing entry in the
+  sitemap, and no pricing link in the site navigation, footer, or either llms.txt. The
+  only commercial path published is a demo request form. Access is sales-gated.
+plan_count: 0
+pricing_published: false
+pricing_model: contact-sales
+free_tier: false
+trial:
+  published: false
+  note: >-
+    The Shopify + Odoo Connector landing page advertises a 30-day free trial for that
+    packaged connector, but no trial is published for Tailor Platform itself.
+commercial_entry_points:
+- name: Request a Demo
+  url: https://www.tailor.tech/demo
+  status: 200
+- name: Console sign-in
+  url: https://console.tailor.tech
+  status: 200
+  note: Redirects to /login. Account creation is not self-serve — the SDK quickstart says "Contact us here to get started".
+account_plan_in_contract:
+  rpc: GetPlatformAccountPlan
+  file: grpc/tailor-tailor-v1-service.proto
+  note: >-
+    The control-plane contract exposes a GetPlatformAccountPlan RPC, so a plan concept
+    exists in the platform — but no plan names, tiers, quotas or prices are published
+    anywhere public.
+probes:
+- url: https://www.tailor.tech/pricing
+  status: 404
+- url: https://www.tailor.tech/sitemap-0.xml
+  status: 200
+  note: 25 URLs, none of them a pricing page.
+- url: https://www.tailor.tech/llms.txt
+  status: 200
+  note: No pricing page listed.
+checked: '2026-08-29'
