@@ -49,6 +49,11 @@ apis:
   tags:
   - Control Plane
   - gRPC
+  - Connect RPC
+  - Protobuf
+  tags_raw:
+  - Control Plane
+  - gRPC
   - ConnectRPC
   - Protobuf
   properties:
@@ -108,6 +113,10 @@ apis:
     (docs.tailor.tech/tutorials/setup-executor/incoming-webhook-trigger). Host probed
     2026-08-29: HTTP 200.
   tags:
+  - Webhook
+  - Event
+  - Integration
+  tags_raw:
   - Webhooks
   - Events
   - Integration
