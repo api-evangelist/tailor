@@ -10,6 +10,22 @@ description: >-
   framework (AppShell) and a first-party MCP server, and publishes llms.txt on both its
   marketing and documentation hosts. Tailor is a Y Combinator (S22) company and has
   raised $37M through Series A.
+accessModel:
+  pricing: unknown
+  onboarding: open
+  trial: false
+  try_now: false
+  public: true
+  label: Open access
+  confidence: medium
+  source:
+  - authentication
+  - scopes
+  - rate-limits
+  - security
+  - sandbox
+  generated: '2026-09-02'
+  method: derived
 image: https://www.tailor.tech/og.jpg
 url: https://raw.githubusercontent.com/api-evangelist/tailor/refs/heads/main/apis.yml
 x-type: company
