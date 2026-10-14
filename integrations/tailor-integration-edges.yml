@@ -1,5 +1,5 @@
 generated: '2026-10-12'
-method: none
+method: searched
 source:
 - https://zapier.com/apps/tailor/integrations
 - https://n8n.io/integrations/tailor/
@@ -9,8 +9,40 @@ checked:
 - https://composio.dev/toolkits/tailor
 - https://monid.ai/tools/tailor
 - https://n8n.io/integrations/tailor/
+- https://registry.modelcontextprotocol.io/v0/servers
 - https://zapier.com/apps/tailor/integrations
 summary: null
 marketplace_apps: []
-edges: []
+edges:
+- partner_name: MCP Registry
+  partner: mcp
+  partner_match: register
+  type: register
+  channel: standard-directory
+  relationship: standard-participant
+  direction: partner-built
+  evidence: https://registry.modelcontextprotocol.io/v0/servers?search=tech.tailor
+  contract_reference:
+    register: registry.modelcontextprotocol.io
+    spec_file: null
+    role: mcp-server-listing
+    registered_name: tech.tailor/mcp
+    register_id: tech.tailor/mcp
+    detected_by: sweep-agent-tools.py
+    detected: '2026-10-14'
+  mcp_registry:
+    servers:
+    - tech.tailor/mcp
+    hosted_remote: 1
+    local_package: 0
+    transports:
+      streamable-http: 1
+    auth_declared: 0
+    catalog_declared: true
+    namespace_domains:
+    - tailor.tech
+  matched_by:
+  - namespace-domain
+  detected_by: sweep-agent-tools.py
+  first_seen: '2026-10-14'
 templates: []
