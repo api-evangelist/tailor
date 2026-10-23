@@ -24,6 +24,9 @@ checked:
 - https://github.com/ScoopInstaller/Extras
 - https://github.com/ScoopInstaller/Main
 - terraform/integrations/terraform-integration-edges.yml
+- https://buf.build/buf.registry.module.v1.ModuleService/ListModules
+- https://buf.build/buf.registry.owner.v1.OwnerService/GetOwners
+- https://buf.build/explore
 summary: null
 marketplace_apps: []
 edges:
@@ -227,4 +230,36 @@ edges:
   detected: '2026-10-21'
   detected_by: mirror-platform-listings.py
   category: infrastructure-as-code provider registry listing
+- partner_name: Buf Schema Registry (BSR) public modules
+  partner: buf
+  partner_match: register
+  type: register
+  channel: standard-directory
+  relationship: standard-participant
+  direction: third-party
+  evidence: https://buf.build/tailor-inc
+  category: Protocol Buffers schema publishing (BSR)
+  contract_reference:
+    register: Buf Schema Registry (BSR) public modules
+    spec_file: null
+    standard: Protocol Buffers
+    role: schema-publisher
+    registrations:
+    - registered_name: tailor-inc
+      register_status: public-modules
+      evidence_url: https://buf.build/tailor-inc
+      matched_domain: tailor.tech
+      matched_by: domain
+      url_source: owner-url
+    modules:
+    - module: buf.build/tailor-inc/tailor
+      state: active
+      lapsed: false
+      created: '2025-07-28'
+    signal_note: 'participation only: the owner publishes Protocol Buffers schema modules on the public BSR; a listing
+      is not conformance (no certified_products)'
+    detected_by: sweep-buf-schema-registry.py
+    detected: '2026-10-23'
+  detected_by: sweep-buf-schema-registry.py
+  first_seen: '2026-10-23'
 templates: []
